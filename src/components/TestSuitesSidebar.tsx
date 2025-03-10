@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { fetchTestSuites, createTestSuite } from "../api";
 import { Typography, Paper, List, ListItem, ListItemText, Button, Box } from "@mui/material";
+import CreateTestSuiteModal from "./CreateTestSuiteModal";
 
 interface TestSuite {
   id: number;
@@ -14,6 +15,7 @@ export default function TestSuitesSidebar() {
 
   const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
   const [newSuiteName, setNewSuiteName] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isNaN(projectId)) {
@@ -52,17 +54,12 @@ export default function TestSuitesSidebar() {
 
       {/* Поле для создания тест-сьюта */}
       <Box sx={{ mt: 2 }}>
-        <input
-          type="text"
-          value={newSuiteName}
-          onChange={(e) => setNewSuiteName(e.target.value)}
-          placeholder="Название тест-сьюта"
-          style={{ width: "100%", padding: "5px" }}
-        />
-        <Button variant="contained" sx={{ mt: 1, width: "100%" }} onClick={handleCreateTestSuite}>
+        <Button variant="contained" sx={{ mt: 1, width: "100%" }} onClick={() => setIsModalOpen(true)}>
           ➕ Добавить тест-сьют
         </Button>
       </Box>
+
+      <CreateTestSuiteModal projectId={projectId} open={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </Paper>
   );
 }

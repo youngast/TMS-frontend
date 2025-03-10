@@ -1,49 +1,51 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { login, fetchUsersLogin } from "../api";
+import { register, fetchUsersLogin } from "../api";
 import { TextField, Button, Box, Typography, Container, Alert } from "@mui/material";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [user, setUser] = useState<{ id: number; email: string } | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       const currentUser = await fetchUsersLogin();
       if (currentUser) {
-        setUser(currentUser);
-        navigate("/");
+        navigate("/login");
       }
     };
     checkAuth();
   }, []);
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     setError(null);
+    setSuccess(false);
     setLoading(true);
 
-    if (!email || !password) {
-      setError("Введите email и пароль");
+    if (!email || !name || !password) {
+      setError("Заполните все поля");
       setLoading(false);
       return;
     }
 
     try {
-      const token = await login(email, password);
+      const token = await register(email, name, password);
       if (!token) {
         throw new Error("Токен не получен");
       }
 
       localStorage.setItem("token", token);
       const currentUser = await fetchUsersLogin();
-      setUser(currentUser);
-      navigate("/");
+
+      setSuccess(true);
+      setTimeout(() => navigate("/login"), 2000); // Через 2 секунды перенаправляем на главную
     } catch (err) {
-      setError("Неверный email или пароль");
+      setError("Ошибка регистрации. Возможно, email уже занят.");
     } finally {
       setLoading(false);
     }
@@ -53,10 +55,11 @@ export default function LoginPage() {
     <Container maxWidth="xs">
       <Box sx={{ mt: 10, textAlign: "center" }}>
         <Typography variant="h5" gutterBottom>
-          Вход в систему
+          Регистрация
         </Typography>
 
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {success && <Alert severity="success" sx={{ mb: 2 }}>Регистрация успешна! Перенаправление...</Alert>}
 
         <TextField
           label="Email"
@@ -64,6 +67,13 @@ export default function LoginPage() {
           margin="normal"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+        />
+        <TextField
+          label="Имя"
+          fullWidth
+          margin="normal"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
         />
         <TextField
           label="Пароль"
@@ -77,17 +87,14 @@ export default function LoginPage() {
           variant="contained" 
           fullWidth 
           sx={{ mt: 2 }} 
-          onClick={handleLogin} 
+          onClick={handleRegister}
           disabled={loading}
         >
-          {loading ? "Вход..." : "Войти"}
+          {loading ? "Регистрация..." : "Зарегистрироваться"}
         </Button>
 
         <Typography variant="body2" sx={{ mt: 2 }}>
-          Нет аккаунта?{" "}
-          <Button variant="text" onClick={() => navigate("/register")}>
-            Зарегистрироваться
-          </Button>
+          Уже есть аккаунт? <Button variant="text" onClick={() => navigate("/login")}>Войти</Button>
         </Typography>
       </Box>
     </Container>

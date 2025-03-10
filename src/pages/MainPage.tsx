@@ -11,7 +11,6 @@ export default function MainPage() {
 
     return (
         <>
-            <NavBar />
             <ProjectLayer />
             {/* <Filters onViewChange={setViewMode} onOpenCreateProject={() => setOpen(true)} /> */}
             <ProjectList viewMode={viewMode} />

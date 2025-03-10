@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { fetchTestSuitesByProjectId, fetchTestCases, createTestCase } from "../api";
+import { fetchTestSuitesByProjectId, fetchTestCases } from "../api";
 import { Typography, Box, Paper, List, ListItem, ListItemText, Button } from "@mui/material";
+import CreateTestCaseModal from "../components/CreateTestCaseModal";
 
 interface TestSuite {
   id: number;
@@ -19,7 +20,7 @@ export default function TestSuiteDetails() {
 
   const [testSuite, setTestSuite] = useState<TestSuite | null>(null);
   const [testCases, setTestCases] = useState<TestCase[]>([]);
-  const [newCaseTitle, setNewCaseTitle] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isNaN(suiteId)) {
@@ -38,26 +39,12 @@ export default function TestSuiteDetails() {
     }
   };
 
-  const handleCreateTestCase = async () => {
-    if (!newCaseTitle.trim()) return;
-    await createTestCase(suiteId, newCaseTitle);
-    setNewCaseTitle("");
-    loadTestSuite();
-  };
-
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4">{testSuite?.name}</Typography>
 
       <Paper sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h6">Создать тест-кейс</Typography>
-        <input
-          type="text"
-          value={newCaseTitle}
-          onChange={(e) => setNewCaseTitle(e.target.value)}
-          placeholder="Название тест-кейса"
-        />
-        <Button variant="contained" sx={{ mt: 1 }} onClick={handleCreateTestCase}>
+        <Button variant="contained" sx={{ mt: 1 }} onClick={() => setIsModalOpen(true)}>
           ➕ Добавить тест-кейс
         </Button>
       </Paper>
@@ -72,6 +59,9 @@ export default function TestSuiteDetails() {
           ))}
         </List>
       </Paper>
+
+      {/* Модальное окно для создания тест-кейса */}
+      <CreateTestCaseModal suiteId={suiteId} open={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </Box>
   );
 }

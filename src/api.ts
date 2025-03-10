@@ -23,14 +23,41 @@ export const login = async (email: string, password: string) => {
   return accessToken;
 };
 
-export const fetchCurrentUser = async () => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  }
-  const response = await axios.get(`${API_URL}/auth/me`);
+export const register = async (email:string , name:string , password: string) =>{
+  const response = await axios.post(`http://localhost:3000/auth/register`, { email, name, password });
   return response.data;
 }
+
+export const fetchUsersLogin = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("Токен отсутствует");
+  }
+
+  try {
+    const response = await axios.get(`${API_URL}/users`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Ошибка при загрузке пользователей:", error);
+    return [];
+  }
+}
+
+export const fetchCurrentUser = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+
+  const response = await fetch(`${API_URL}/users/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) throw new Error("Ошибка авторизации");
+
+  return response.json();
+};
+
 
 
 export const fetchProjects = async () => {
@@ -163,6 +190,68 @@ export const createTestRun = async (suiteId: number, caseId: number, title: stri
     description,
     status: "ONWORK",
     executionTime: 0,
+  });
+
+  return response.data;
+};
+
+export const deleteTestSuite = async (suiteId: number) => {
+  const response = await axios.delete(`${API_PROJECT_URL}/${suiteId}`);
+  return response.data;
+};
+
+export const deleteProject = async (projectId: number) => {
+  try{
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Токен отсутствует");
+    }
+    const response = await axios.delete(`${API_PROJECT_URL}/${projectId}`,{
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  }catch(error){
+    console.error("Error deleting project:", error);
+  }
+};
+
+
+
+export const addUserToProject = async (projectId: number, userId: number) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Токен отсутствует");
+    }
+
+    const response = await axios.post(
+      `${API_PROJECT_URL}/${projectId}/members/${userId}`,
+      {}, // Пустое тело запроса
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Ошибка при добавлении пользователя в проект:", error);
+  }
+};
+
+
+
+export const fetchUsers = async (id?: number, email?: string) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("Токен отсутствует");
+  }
+
+  const params: Record<string, any> = {};
+  if (id) params.id = id;
+  if (email) params.email = email;
+
+  const response = await axios.get(`${API_URL}/users`, {
+    headers: { Authorization: `Bearer ${token}` },
+    params,
   });
 
   return response.data;

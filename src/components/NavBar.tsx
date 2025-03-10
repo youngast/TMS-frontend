@@ -41,7 +41,7 @@ export default function NavBar() {
         <Box sx={{display:'flex', width: '100%', bgcolor: 'background.white', justifyContent: 'space-between',
          }}>
             <Tabs value={value} onChange={handleChange}>
-                <Tab label="SpectraAi" sx={{fontFamily: "Inter, sans-serif", fontWeight: 900 , fontSize:"12px" , fontlineHeight:"15px" , color:'#BA3CCD'}} />
+                <Tab label="SpectraAi" sx={{fontFamily: "Inter, sans-serif", fontWeight: 900 , fontSize:"12px" , fontlineHeight:"15px" , color:'#BA3CCD'}} onClick={() => navigate('/')} />
                 <Tab label="Проекты" sx={{fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize:"12px" , fontlineHeight:"15px"}}/>
                 <Tab label="Среда тестирования" sx={{fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize:"12px" , fontlineHeight:"15px"}}/>
                 <Tab label="Мониторинг тестирования"sx={{fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize:"12px" , fontlineHeight:"15px"}}/>
