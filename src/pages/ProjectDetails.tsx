@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   fetchProjectById,
-  deleteProject,
+  deleteTestSuite,
+  updateTestSuite,
   createTestSuite,
-  addUserToProject
+  fetchTestSuitesByProjectId
 } from "../api";
 import {
   Typography,
@@ -14,21 +15,21 @@ import {
   Card,
   CardContent,
   CardActions,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
   IconButton,
   Tooltip,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
-  List,
-  ListItem,
-  ListItemText,
   TextField,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useAuth } from "../useAuth";
 import CreateTestSuiteModal from "../components/CreateTestSuiteModal";
 
 interface Project {
@@ -36,6 +37,7 @@ interface Project {
   name: string;
   description: string;
   createdAt?: string;
+  testSuites?: { id: number; name: string; testCasesCount: number; createdAt: string; updatedAt: string }[];
   members: { id: number; name: string }[];
   owner: { id: number; name: string };
 }
@@ -47,22 +49,11 @@ export default function ProjectDetails() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [testSuiteModalOpen, setTestSuiteModalOpen] = useState(false);
-  const [newUserId, setNewUserId] = useState("");
-  const [addingUser, setAddingUser] = useState(false);
+  const [editSuite, setEditSuite] = useState<{ id: number; name: string } | null>(null);
+  const [deleteSuiteId, setDeleteSuiteId] = useState<number | null>(null);
 
   const navigate = useNavigate();
-  const { userId } = useAuth();
-
-  // useEffect(() => {
-  //   if (!isNaN(projectId)) {
-  //     loadProject();
-  //   } else {
-  //     console.error("❌ Ошибка: projectId = NaN");
-  //     setLoading(false);
-  //   }
-  // }, [projectId]);
 
   useEffect(() => {
     if (!isNaN(projectId)) {
@@ -73,8 +64,10 @@ export default function ProjectDetails() {
   const loadProject = async () => {
     try {
       setLoading(true);
+      console.log(`Запрос на проект: /projects/${projectId}`);
       const projectData = await fetchProjectById(projectId);
-      setProject(projectData);
+      const testsuite = await fetchTestSuitesByProjectId(projectId);
+      setProject({ ...projectData, testSuites: testsuite });
       setError(null);
     } catch (err) {
       console.error("❌ Ошибка при загрузке проекта:", err);
@@ -84,159 +77,104 @@ export default function ProjectDetails() {
     }
   };
 
-  const handleDeleteProject = async () => {
-    try {
-      await deleteProject(project?.id || 0);
-      navigate("/");
-    } catch (err) {
-      console.error("❌ Ошибка при удалении проекта:", err);
+  const handleEditSuite = async () => {
+    if (editSuite && projectId) {
+      console.log(`🔹 Обновление тест-сьюта ${editSuite.id} в проекте ${projectId}`);
+      try {
+        await updateTestSuite(projectId, editSuite.id, { name: editSuite.name });
+        setEditSuite(null);
+        loadProject(); // Обновляем данные после редактирования
+      } catch (error) {
+        console.error("❌ Ошибка при обновлении тест-сьюта:", error);
+      }
     }
   };
-
-  const handleCreateTestSuite = async (name: string) => {
-    try {
-      await createTestSuite(project?.id || 0, name);
-      alert("✅ Тест-сьют создан успешно!");
-    } catch (err) {
-      console.error("❌ Ошибка при создании тест-сьюта:", err);
-    }
-  };
-
-  const handleAddUser = async () => {
-    if (!newUserId.trim()) return;
-    try {
-      setAddingUser(true);
-      await addUserToProject(project?.id || 0, +newUserId);
-      setNewUserId("");
-      loadProject(); // Обновляем список участников
-    } catch (err) {
-      console.error("❌ Ошибка при добавлении пользователя:", err);
-    } finally {
-      setAddingUser(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ textAlign: "center", mt: 4 }}>
-        <Typography color="error">{error}</Typography>
-        <Button onClick={loadProject} variant="contained" sx={{ mt: 2 }}>
-          Повторить попытку
-        </Button>
-      </Box>
-    );
-  }
-
-  const isOwner = project?.owner?.id === userId;
-  const isMember = project?.members?.some((member) => member.id === userId);
-  const canCreateTestSuite = isOwner || isMember;
+  
+  // const handleDeleteSuite = async () => {
+  //   if (deleteSuiteId) {
+  //     await deleteTestSuite(deleteSuiteId);
+  //     setDeleteSuiteId(null);
+  //     loadProject();
+  //   }
+  // };
+  
 
   return (
     <Box sx={{ display: "flex", height: "100vh", bgcolor: "#f5f5f5" }}>
       <Box sx={{ flex: 1, p: 3, display: "flex", flexDirection: "column", gap: 2 }}>
-        {/* Карточка проекта */}
         <Card sx={{ p: 2, boxShadow: 3, borderRadius: 2 }}>
           <CardContent>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-                {project?.name}
-              </Typography>
-
-              {isOwner && (
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  <Tooltip title="Редактировать">
-                    <IconButton>
-                      <EditIcon />
-                    </IconButton>
-                  </Tooltip>
-
-                  <Tooltip title="Удалить проект">
-                    <IconButton onClick={() => setDeleteDialogOpen(true)} color="error">
-                      <DeleteIcon />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-              )}
-            </Box>
-
-            <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-              {project?.description}
-            </Typography>
-
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Дата создания: {project?.createdAt || "Неизвестно"}
+            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+              {project?.name}
             </Typography>
           </CardContent>
-
           <CardActions>
-            <Button variant="contained" onClick={() => navigate(`/test-suites/${projectId}`)}>
-              Открыть тест-сьюты
+            <Button variant="contained" color="primary" onClick={() => setTestSuiteModalOpen(true)}>
+              Создать тест-сьют
             </Button>
-
-            {canCreateTestSuite && (
-              <Button variant="contained" color="primary" onClick={() => setTestSuiteModalOpen(true)}>
-                Создать тест-сьют
-              </Button>
-            )}
           </CardActions>
         </Card>
-
-        {/* Карточка участников */}
+        
         <Card sx={{ p: 2, boxShadow: 3, borderRadius: 2 }}>
           <CardContent>
-            <Typography variant="h6">Участники проекта</Typography>
-            <List>
-              {project?.members.map((member) => (
-                <ListItem key={member.id}>
-                  <ListItemText primary={member.name} />
-                </ListItem>
-              ))}
-            </List>
-
-            {isOwner && (
-              <Box sx={{ mt: 2 }}>
-                <TextField
-                  label="ID пользователя"
-                  fullWidth
-                  value={newUserId}
-                  onChange={(e) => setNewUserId(e.target.value)}
-                />
-                <Button
-                  variant="contained"
-                  sx={{ mt: 1 }}
-                  onClick={handleAddUser}
-                  disabled={addingUser}
-                >
-                  {addingUser ? "Добавляем..." : "+ Добавить участника"}
-                </Button>
-              </Box>
-            )}
+            <Typography variant="h6" sx={{ mb: 2 }}>Тест-сьюты</Typography>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>Название</TableCell>
+                  <TableCell>Кол-во тест-кейсов</TableCell>
+                  <TableCell>Дата создания</TableCell>
+                  <TableCell>Дата обновления</TableCell>
+                  <TableCell>Действия</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {project?.testSuites?.map((suite) => (
+                  <TableRow key={suite.id}>
+                    <TableCell>{suite.id}</TableCell>
+                    <TableCell>{suite.name}</TableCell>
+                    <TableCell>{suite.testCasesCount}</TableCell>
+                    <TableCell>{suite.createdAt}</TableCell>
+                    <TableCell>{suite.updatedAt}</TableCell>
+                    <TableCell>
+                      <Tooltip title="Редактировать">
+                        <IconButton onClick={() => setEditSuite({ id: suite.id, name: suite.name })}>
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Удалить">
+                        <IconButton color="error" onClick={() => setDeleteSuiteId(suite.id)}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       </Box>
-
-      {/* Модалка создания тест-сьюта */}
-      <CreateTestSuiteModal projectId={project?.id || 0} open={testSuiteModalOpen} onClose={() => setTestSuiteModalOpen(false)} />
-
-      {/* Диалог удаления */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Удаление проекта</DialogTitle>
+      <CreateTestSuiteModal projectId={project?.id || 0} open={testSuiteModalOpen} onClose={() => setTestSuiteModalOpen(false)} onCreate={loadProject} />
+      
+      <Dialog open={!!editSuite} onClose={() => setEditSuite(null)}>
+        <DialogTitle>Редактировать тест-сьют</DialogTitle>
         <DialogContent>
-          <DialogContentText>Вы уверены, что хотите удалить этот проект?</DialogContentText>
+          <TextField fullWidth value={editSuite?.name || ""} onChange={(e) => setEditSuite({ ...editSuite!, name: e.target.value })} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Отмена</Button>
-          <Button onClick={handleDeleteProject} color="error">
-            Удалить
-          </Button>
+          <Button onClick={() => setEditSuite(null)}>Отмена</Button>
+          <Button onClick={handleEditSuite} color="primary">Сохранить</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={!!deleteSuiteId} onClose={() => setDeleteSuiteId(null)}>
+        <DialogTitle>Удаление тест-сьюта</DialogTitle>
+        <DialogContent>Вы уверены, что хотите удалить этот тест-сьют?</DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteSuiteId(null)}>Отмена</Button>
+          {/* <Button onClick={handleDeleteSuite} color="error">Удалить</Button> */}
         </DialogActions>
       </Dialog>
     </Box>

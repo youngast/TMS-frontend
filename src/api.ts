@@ -138,13 +138,8 @@ export const fetchTestCases = async (suiteId: number) => {
 };
 
 export const fetchTestSuitesByProjectId = async (projectId: number) => {
-  try {
-    const response = await axios.get(`${API_URL}/projects/${projectId}/test-suites`);
-    return response.data;
-  } catch (error) {
-    console.error(`❌ Ошибка при загрузке тест-сьютов проекта ID=${projectId}:`, error);
-    throw error;
-  }
+  const response = await axios.get(`${API_URL}/projects/${projectId}/test-suites`);
+  return response.data;
 };
 
 export const fetchTestRuns = async (suiteId: number, caseId: number) => {
@@ -195,8 +190,30 @@ export const createTestRun = async (suiteId: number, caseId: number, title: stri
   return response.data;
 };
 
-export const deleteTestSuite = async (suiteId: number) => {
-  const response = await axios.delete(`${API_PROJECT_URL}/${suiteId}`);
+export const updateTestSuite = async (projectId: number, suiteId: number, data: any) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("Токен отсутствует");
+  }
+
+  const response = await axios.patch(
+    `http://localhost:3000/api/projects/${projectId}/test-suites/${suiteId}`, // ✅ Исправленный URL
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+export const deleteTestSuite = async (projectId:number,suiteId: number) => {
+  const token = localStorage.getItem("token");
+  const response = await axios.delete(`${API_PROJECT_URL}/${projectId}/test-suites/${suiteId}`, {
+    headers: { Authorization: `Bearer ${token}` },});
   return response.data;
 };
 
