@@ -137,6 +137,26 @@ export const fetchTestCases = async (suiteId: number) => {
   }
 };
 
+export const fetchTestCasesBySuiteId = async (testSuiteId: number) => {
+  try {
+    const response = await axios.get(`${API_URL}/test-suites/${testSuiteId}/test-cases`);
+    return response.data;
+  } catch (error) {
+    console.error(`Ошибка при загрузке тест-кейсов для testSuiteId=${testSuiteId}:`, error);
+    return [];
+  }
+};
+
+export const fetchTestCaseById = async (testCaseId: number) => {
+  try {
+    const response = await axios.get(`${API_URL}/test-suites/:testSuiteId/test-cases/${testCaseId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Ошибка при загрузке тест-кейса id=${testCaseId}:`, error);
+    throw error;
+  }
+};
+
 export const fetchTestSuitesByProjectId = async (projectId: number) => {
   const response = await axios.get(`${API_URL}/projects/${projectId}/test-suites`);
   return response.data;
@@ -156,21 +176,12 @@ export const createTestSuite = async (projectId: number, name: string) => {
   return response.data;
 };
 
-export const createTestCase = async (suiteId: number, title: string) => {
-  if (!suiteId || isNaN(suiteId) || !title.trim()) {
-    throw new Error("Некорректные данные для создания тест-кейса");
-  }
-
-  console.log(`📡 Отправляем запрос: POST http://localhost:3000/test-suites/${suiteId}/test-cases`);
-
+export const createTestCase = async (testSuiteId: number, testCaseData: { title: string; description?: string; steps: string; expectedResult?: string; status?: string }) => {
   try {
-    const response = await axios.post(`http://localhost:3000/test-suites/${suiteId}/test-cases`, {
-      title,
-    });
-    console.log("✅ Тест-кейс создан:", response.data);
+    const response = await axios.post(`${API_URL}/test-suites/${testSuiteId}/test-cases`, testCaseData);
     return response.data;
   } catch (error) {
-    console.error(`❌ Ошибка при создании тест-кейса в suiteId=${suiteId}:`, error);
+    console.error(`Ошибка при создании тест-кейса в testSuiteId=${testSuiteId}:`, error);
     throw error;
   }
 };
@@ -197,7 +208,7 @@ export const updateTestSuite = async (projectId: number, suiteId: number, data: 
   }
 
   const response = await axios.patch(
-    `http://localhost:3000/api/projects/${projectId}/test-suites/${suiteId}`, // ✅ Исправленный URL
+    `http://localhost:3000/projects/${projectId}/test-suites/${suiteId}`,
     data,
     {
       headers: {
@@ -210,9 +221,19 @@ export const updateTestSuite = async (projectId: number, suiteId: number, data: 
   return response.data;
 };
 
+export const updateTestCase = async (testCaseId: number, testCaseData: { title?: string; description?: string; steps?: string; expectedResult?: string; status?: string }) => {
+  try {
+    await axios.patch(`${API_URL}/test-suites/:testSuiteId/test-cases/${testCaseId}`, testCaseData);
+  } catch (error) {
+    console.error(`Ошибка при обновлении тест-кейса id=${testCaseId}:`, error);
+    throw error;
+  }
+};
+
+
 export const deleteTestSuite = async (projectId:number,suiteId: number) => {
   const token = localStorage.getItem("token");
-  const response = await axios.delete(`${API_PROJECT_URL}/${projectId}/test-suites/${suiteId}`, {
+  const response = await axios.delete(`http://localhost:3000/projects/${projectId}/test-suites/${suiteId}`, {
     headers: { Authorization: `Bearer ${token}` },});
   return response.data;
 };
@@ -232,7 +253,14 @@ export const deleteProject = async (projectId: number) => {
   }
 };
 
-
+export const deleteTestCase = async (testCaseId: number) => {
+  try {
+    await axios.delete(`${API_URL}/test-suites/:testSuiteId/test-cases/${testCaseId}`);
+  } catch (error) {
+    console.error(`Ошибка при удалении тест-кейса id=${testCaseId}:`, error);
+    throw error;
+  }
+};
 
 export const addUserToProject = async (projectId: number, userId: number) => {
   try {

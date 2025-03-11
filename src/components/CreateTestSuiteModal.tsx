@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { Modal, Box, Typography, TextField, Button } from "@mui/material";
 import { createTestSuite } from "../api";
+import { TestSuite } from "../types";
 
 interface CreateTestSuiteModalProps {
     projectId: number;
     open: boolean;
     onClose: () => void;
+    onCreate: (newSuite: TestSuite) => void;
 }
 
-export default function CreateTestSuiteModal({ projectId, open , onClose }: CreateTestSuiteModalProps) {
+export default function CreateTestSuiteModal({ projectId,  open, onClose, onCreate }: CreateTestSuiteModalProps) {
     const [name, setName] = useState("");
     const [error, setError] = useState<string | null>(null);
 
@@ -17,13 +19,13 @@ export default function CreateTestSuiteModal({ projectId, open , onClose }: Crea
             setError("Название не должно быть пустым");
             return;
         }
-        try{
-            await createTestSuite(projectId, name);
-            setName("");
+        try {
+            const newSuite = await createTestSuite(projectId, name);
+            onCreate(newSuite);
             onClose();
-        }catch(error){
-            console.error("Error creating test suite:", error);
-        }
+          } catch (error) {
+            console.error("❌ Ошибка при создании тест-сьюта:", error);
+          }
     }
     
     return (

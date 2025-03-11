@@ -11,7 +11,8 @@ const TestSuitesPage = () => {
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const handleChange = (e) => setNewSuite({ ...newSuite, [e.target.name]: e.target.value });
+  // const handleChange = (event) => setNewSuite({ ...newSuite, [event.target.name]: event.target.value });
+
   const handleCreate = () => {
     if (newSuite.name.trim()) {
       setTestSuites([...testSuites, { id: testSuites.length + 1, name: newSuite.name, testCases: 0, createdAt: "Сегодня", updatedAt: "Сегодня" }]);
@@ -58,7 +59,7 @@ const TestSuitesPage = () => {
             fullWidth
             variant="outlined"
             value={newSuite.name}
-            onChange={handleChange}
+            // onChange={handleChange}
           />
           <TextField
             margin="dense"
@@ -69,7 +70,7 @@ const TestSuitesPage = () => {
             rows={3}
             variant="outlined"
             value={newSuite.description}
-            onChange={handleChange}
+            // onChange={handleChange}
           />
         </DialogContent>
         <DialogActions>

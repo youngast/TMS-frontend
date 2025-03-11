@@ -78,12 +78,6 @@ export default function ProjectList({ viewMode }: { viewMode: "list" | "grid" })
                     <TableCell>{project.name}</TableCell>
                     <TableCell>{project.owner.name}</TableCell>
                     <TableCell align="right">
-                      <Button variant="outlined" onClick={(e) => {
-                        e.stopPropagation(); // Останавливаем клик, чтобы не переходить при нажатии на кнопку
-                        handleOpenProject(project.id);
-                      }}>
-                        Открыть
-                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -102,14 +96,14 @@ export default function ProjectList({ viewMode }: { viewMode: "list" | "grid" })
               <Grid item xs={12} sm={6} md={3} key={project.id}>
                 <Card
                   sx={{ p: 2, cursor: "pointer", "&:hover": { bgcolor: "#f5f5f5" } }}
-                  onClick={() => handleOpenProject(project.id)} // Переход при клике
+                  onClick={() => handleOpenProject(project.id)}
                 >
                   <CardContent>
                     <Typography variant="h6">{project.name}</Typography>
                     <Typography variant="body2">Владелец: {project.owner.name}</Typography>
                   </CardContent>
                   <Button variant="outlined" onClick={(e) => {
-                    e.stopPropagation(); // Останавливаем всплытие клика
+                    e.stopPropagation();
                     handleOpenProject(project.id);
                   }} sx={{ m: 1 }}>
                     Открыть
