@@ -21,7 +21,7 @@ import Filters from "./Filters";
 interface Project {
   id: number;
   name: string;
-  owner: { name: string };
+  owner: { id:number, name: string };
 }
 
 export default function ProjectList({ viewMode }: { viewMode: "list" | "grid" }) {

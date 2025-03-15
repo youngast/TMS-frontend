@@ -49,13 +49,16 @@ export const fetchCurrentUser = async () => {
   const token = localStorage.getItem("token");
   if (!token) return null;
 
-  const response = await fetch(`${API_URL}/users/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  try {
+    const response = await axios.get(`${API_URL}/users/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-  if (!response.ok) throw new Error("Ошибка авторизации");
-
-  return response.json();
+    return response.data;
+  } catch (error) {
+    console.error("Ошибка получения текущего пользователя:", error);
+    return null;
+  }
 };
 
 
