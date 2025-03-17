@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Modal, Box, Typography, TextField, Button } from "@mui/material";
-import { createTestSuite } from "../api";
+import { createTestSuite } from "../api/api";
 import { TestSuite } from "../types";
 
 interface CreateTestSuiteModalProps {

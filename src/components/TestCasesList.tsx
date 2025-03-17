@@ -49,20 +49,27 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
 
   const handleOpenModal = (testCase?: TestCase) => {
     setSelectedTestCase(
-      testCase || {
-        id: 0,
-        title: "",
-        description: "",
-        steps: [],
-        status: "new",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }
+      testCase
+        ? {
+            ...testCase,
+            steps: typeof testCase.steps === "string" ? JSON.parse(testCase.steps) : testCase.steps || [],
+          }
+        : {
+            id: 0,
+            title: "",
+            description: "",
+            steps: [],
+            status: "new",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }
     );
+  
     setIsEditing(!!testCase);
     setTitleError(false);
     setModalOpen(true);
   };
+  
 
   const handleCloseModal = () => {
     setModalOpen(false);
@@ -75,14 +82,21 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
       return;
     }
     setTitleError(false);
+  
+    const formattedTestCase = {
+      ...selectedTestCase,
+      steps: JSON.stringify(selectedTestCase.steps),
+    };
+  
     if (isEditing) {
-      onEditTestCase(selectedTestCase.id, selectedTestCase);
+      onEditTestCase(selectedTestCase.id, formattedTestCase);
     } else {
-      onCreateTestCase(selectedTestCase);
+      onCreateTestCase(formattedTestCase);
     }
+  
     handleCloseModal();
   };
-
+  
   const handleAddStep = () => {
     setSelectedTestCase((prev) =>
       prev ? { ...prev, steps: [...prev.steps, { id: crypto.randomUUID(), step: "", expectedResult: "" }] } : prev
@@ -151,10 +165,11 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
           <Button onClick={handleAddStep} variant="outlined" sx={{ mb: 2 }}>+ Добавить шаг</Button>
 
           <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="steps">
-              {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps}>
-                  {selectedTestCase?.steps.map((step, index) => (
+          <Droppable droppableId="steps">
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {Array.isArray(selectedTestCase?.steps) &&
+                  selectedTestCase.steps.map((step, index) => (
                     <Draggable key={step.id} draggableId={step.id} index={index}>
                       {(provided) => (
                         <Box
@@ -172,7 +187,7 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
                                 prev
                                   ? {
                                       ...prev,
-                                      steps: prev.steps.map(s =>
+                                      steps: prev.steps.map((s) =>
                                         s.id === step.id ? { ...s, step: e.target.value } : s
                                       ),
                                     }
@@ -189,7 +204,7 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
                                 prev
                                   ? {
                                       ...prev,
-                                      steps: prev.steps.map(s =>
+                                      steps: prev.steps.map((s) =>
                                         s.id === step.id ? { ...s, expectedResult: e.target.value } : s
                                       ),
                                     }
@@ -204,10 +219,10 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
                       )}
                     </Draggable>
                   ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
           </DragDropContext>
 
           <Select

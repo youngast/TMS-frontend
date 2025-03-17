@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createProject } from "../api";
+import { createProject } from "../api/api";
 import { Modal, Box, TextField, Button, Typography } from "@mui/material";
 
 export default function CreateProjectModal({ open, onClose, onProjectCreated }: { open: boolean; onClose: () => void; onProjectCreated: () => void }) {

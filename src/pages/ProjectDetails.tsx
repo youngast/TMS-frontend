@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { fetchProjectById, fetchTestSuitesByProjectId, createTestSuite, updateTestSuite, deleteTestSuite, fetchTestCasesBySuiteId, createTestCase, updateTestCase, deleteTestCase } from "../api";
+import { useParams, Link } from "react-router-dom";
+import { fetchProjectById, fetchTestSuitesByProjectId, createTestSuite, updateTestSuite, deleteTestSuite, fetchTestCasesBySuiteId, createTestCase, updateTestCase, deleteTestCase } from "../api/api";
 import TestSuitesSidebar from "../components/TestSuitesSidebar";
 import TestCasesList from "../components/TestCasesList";
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Modal, Box, Typography, TextField, Button } from "@mui/material";
-import { createTestCase } from "../api";
+import { createTestCase } from "../api/api";
 
 interface CreateTestCaseModalProps {
   suiteId: number;

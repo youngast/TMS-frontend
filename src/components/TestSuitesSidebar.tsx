@@ -104,7 +104,7 @@ export default function TestSuitesSidebar({
         </List>
       </Box>
 
-      {/* Модалка редактирования тест-сьюта */}
+      {/* Модалка */}
       <Dialog open={!!editSuite} onClose={() => setEditSuite(null)}>
         <DialogTitle>Редактировать тест-сьют</DialogTitle>
         <DialogContent>

@@ -9,6 +9,7 @@ import ProjectDetails from "./pages/ProjectDetails.tsx";
 import TestSuiteDetails from "./pages/TestSuiteDetails";
 import Layout from "./components/Layout";
 import RegisterPage from "./pages/RegisterPage.tsx";
+import TestRunsPage from "./pages/TestRunPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -29,6 +30,7 @@ const router = createBrowserRouter([
     children: [
       { path: "/", element: <App /> },
       { path: "projects/:id", element: <ProjectDetails /> },
+      { path: "projects/:id/test-runs", element: <TestRunsPage /> },
       { path: "test-suites/:id", element: <TestSuiteDetails /> },
     ],
   },

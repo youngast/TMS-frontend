@@ -9,13 +9,12 @@ import {
   List,
   ListItem,
   ListItemText,
-  IconButton,
   Select,
   MenuItem,
   FormControl,
   InputLabel,
 } from "@mui/material";
-import { fetchProjectById, fetchUsers, addUserToProject } from "../api";
+import { fetchProjectById, fetchUsers, addUserToProject } from "../api/api";
 
 interface ProjectDetailsModalProps {
   open: boolean;

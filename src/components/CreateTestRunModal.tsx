@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Modal, Box, Typography, TextField, Button } from "@mui/material";
-import { createTestRun } from "../api";
+import { createTestRun } from "../api/api";
 
 export default function CreateTestRunModal({ suiteId, caseId, onClose }: { suiteId: number; caseId: number; onClose: () => void }) {
   const [title, setTitle] = useState("");

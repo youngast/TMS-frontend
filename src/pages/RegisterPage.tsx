@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { register, fetchUsersLogin } from "../api";
+import { register, fetchUsersLogin } from "../api/api";
 import { TextField, Button, Box, Typography, Container, Alert } from "@mui/material";
 
 export default function RegisterPage() {
@@ -40,7 +40,6 @@ export default function RegisterPage() {
       }
 
       localStorage.setItem("token", token);
-      const currentUser = await fetchUsersLogin();
 
       setSuccess(true);
       setTimeout(() => navigate("/login"), 2000); // Через 2 секунды перенаправляем на главную
