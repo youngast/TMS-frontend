@@ -3,8 +3,9 @@ import { useParams, Link } from "react-router-dom";
 import { fetchProjectById, fetchTestSuitesByProjectId, createTestSuite, updateTestSuite, deleteTestSuite, fetchTestCasesBySuiteId, createTestCase, updateTestCase, deleteTestCase } from "../api/api";
 import TestSuitesSidebar from "../components/TestSuitesSidebar";
 import TestCasesList from "../components/TestCasesList";
+import TestRunsPage from "./TestRunPage";
 
-interface Step {
+export interface Step {
   id: string;
   step: string;
   expectedResult: string;
@@ -44,19 +45,22 @@ export default function ProjectDetails() {
 
   useEffect(() => {
     if (selectedSuiteId) {
-      console.log(`⚡ Запрос тест-кейсов: GET /test-suites/${selectedSuiteId}/test-cases`);
-      fetchTestCasesBySuiteId(selectedSuiteId).then(setTestCases);
+        console.log(`⚡ Запрос тест-кейсов: GET /test-suites/${selectedSuiteId}/test-cases`);
+        fetchTestCasesBySuiteId(selectedSuiteId).then((data) => {
+            console.log("Полученные тест-кейсы:", data);
+            setTestCases(data);
+        });
     } else {
-      setTestCases([]);
+        setTestCases([]);
     }
-  }, [selectedSuiteId]);
+    console.log("Обновление selectedTestCase:", selectedTestCase);
+}, [selectedSuiteId]);
 
 
-  // ✅ Функция создания тест-сьюта (с обновлением состояния)
   const handleCreateSuite = async (name: string) => {
     try {
       const newSuite = await createTestSuite(projectId, name);
-      setTestSuites((prev) => [...prev, newSuite]); // ✅ Добавляем новый сьют в список
+      setTestSuites((prev) => [...prev, newSuite]);
     } catch (err) {
       console.error("Ошибка создания тест-сьюта:", err);
     }
@@ -82,37 +86,46 @@ export default function ProjectDetails() {
       console.error("Ошибка удаления тест-сьюта:", err);
     }
   };
+
   
   const handleCreateTestCase = async (testCaseData: Omit<TestCase, "id" | "createdAt" | "updatedAt">) => {
     if (!selectedSuiteId) return;
     try {
-      const formattedTestCaseData = {
-        ...testCaseData,
-        steps: JSON.stringify(testCaseData.steps),  // 🔹 Преобразуем массив steps в строку
-      };
-      const newTestCase = await createTestCase(selectedSuiteId, formattedTestCaseData);
-      setTestCases((prev) => [...prev, { ...newTestCase, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }]);
-    } catch (err) {
-      console.error("Ошибка создания тест-кейса:", err);
-    }
-  };
+        const formattedTestCaseData = {
+            ...testCaseData,
+            steps: [...testCaseData.steps],  // <-- убедись, что тут steps не пустой
+        };
+        console.log("Отправляем данные на создание тест-кейса:", formattedTestCaseData);
 
-  const handleEditTestCase = async (id: number, testCaseData: Partial<TestCase>) => {
-    try {
-      const formattedTestCaseData = {
-        ...testCaseData,
-        steps: testCaseData.steps ? JSON.stringify(testCaseData.steps) : undefined, // 🔹 Если steps есть, преобразуем его в строку
-      };
-      await updateTestCase(id, formattedTestCaseData);
-      setTestCases((prev) =>
-        prev.map((testCase) =>
-          testCase.id === id ? { ...testCase, ...testCaseData, updatedAt: new Date().toISOString() } : testCase
-        )
-      );
+        const newTestCase = await createTestCase(selectedSuiteId, formattedTestCaseData);
+        console.log("Создан тест-кейс:", newTestCase);
+
+        setTestCases((prev) => [...prev, { ...newTestCase, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }]);
     } catch (err) {
-      console.error("Ошибка обновления тест-кейса:", err);
+        console.error("Ошибка создания тест-кейса:", err);
     }
-  };
+};
+
+const handleEditTestCase = async (id: number, testCaseData: Partial<TestCase>) => {
+  try {
+      const formattedTestCaseData = {
+          ...testCaseData,
+          steps: testCaseData.steps ? [...testCaseData.steps] : [],
+      };
+      
+      console.log("Обновляем тест-кейс:", formattedTestCaseData);
+
+      await updateTestCase(id, formattedTestCaseData);
+
+      setTestCases((prev) =>
+          prev.map((testCase) =>
+              testCase.id === id ? { ...testCase, ...formattedTestCaseData, updatedAt: new Date().toISOString() } : testCase
+          )
+      );
+  } catch (err) {
+      console.error("Ошибка обновления тест-кейса:", err);
+  }
+};
 
   const handleDeleteTestCase = async (id: number) => {
     try {
@@ -122,7 +135,6 @@ export default function ProjectDetails() {
       console.error("Ошибка удаления тест-кейса:", err);
     }
   };
-
 
   return (
     <div style={{ display: "flex" }}>
@@ -134,7 +146,13 @@ export default function ProjectDetails() {
         onEditSuite={handleEditSuite}
         onDeleteSuite={handleDeleteSuite}
       />
+      {/* <TextField label="Поиск" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === "Enter" && handleSearchTestCase(searchTerm)}/> */}
       <TestCasesList testCases={testCases} onCreateTestCase={handleCreateTestCase} onEditTestCase={handleEditTestCase} onDeleteTestCase={handleDeleteTestCase} />
+      <Link to={`/projects/${projectId}/test-runs`}>
+        <button style={{ padding: "10px 15px", background: "#1976d2", color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}>
+          Перейти в Test Run
+        </button>
+      </Link>    
     </div>
   );
 }

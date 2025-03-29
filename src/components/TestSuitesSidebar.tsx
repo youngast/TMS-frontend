@@ -71,7 +71,7 @@ export default function TestSuitesSidebar({
           onClick={() => {
             if (newSuiteName.trim()) {
               onCreateSuite(newSuiteName);
-              setNewSuiteName(""); // ✅ Очищаем поле после создания
+              setNewSuiteName("");
             }
           }}
         >

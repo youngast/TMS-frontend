@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { searchTestCase } from "../api/TestCaseapi";
 
 interface Step {
   id: string;
@@ -41,11 +42,13 @@ interface Props {
   onDeleteTestCase: (id: number) => void;
 }
 
-export default function TestCasesList({ testCases, onCreateTestCase, onEditTestCase, onDeleteTestCase }: Props) {
+export default function TestCasesList({ testCases, onCreateTestCase, onEditTestCase, onDeleteTestCase }: Props,) {
   const [modalOpen, setModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedTestCase, setSelectedTestCase] = useState<TestCase | null>(null);
   const [titleError, setTitleError] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
 
   const handleOpenModal = (testCase?: TestCase) => {
     setSelectedTestCase(
@@ -85,7 +88,7 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
   
     const formattedTestCase = {
       ...selectedTestCase,
-      steps: JSON.stringify(selectedTestCase.steps),
+      steps: [...selectedTestCase.steps],
     };
   
     if (isEditing) {
@@ -115,16 +118,21 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
     setSelectedTestCase({ ...selectedTestCase, steps: reorderedSteps });
   };
 
+  const filteredTestCases = testCases.filter((testCase) =>
+    testCase.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+
   return (
     <Box sx={{ flex: 1, p: 3 }}>
       <Typography variant="h5">{"Проект"}</Typography>
-
+      
       <Button variant="contained" sx={{ mt: 2 }} onClick={() => handleOpenModal()}>
         + Создать тест-кейс
       </Button>
-
+      {/* <TextField label="Поиск" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === "Enter" && searchTestCase(searchTerm)}/> */}
       <List sx={{ mt: 2 }}>
-        {testCases.map((testCase) => (
+        {filteredTestCases.map((testCase) => (
           <ListItem 
             key={testCase.id} 
             sx={{ display: "flex", justifyContent: "space-between", cursor: "pointer" }} 
@@ -243,4 +251,4 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
       </Dialog>
     </Box>
   );
-}
+};

@@ -7,7 +7,12 @@ export const getTestRuns = async (projectId:number) =>{
     return response.data;
 }
 
-export const createTestRun = async (projectId: number, data: any) => {
+export const createTestRun = async (projectId: number, data: { 
+    title: string; 
+    description?: string; 
+    testSuiteId?: number; 
+    testCaseIds?: number[]; 
+}) => {
     const response = await axios.post(`${API_URL}/${projectId}/test-runs`, data);
     return response.data;
 };
@@ -25,4 +30,17 @@ export const updateTestRun = async (projectId: number, testRunId: number, data: 
 export const deleteTestRun = async (projectId: number, testRunId: number) => {
     const response = await axios.delete(`${API_URL}/${projectId}/test-runs/${testRunId}`);
     return response.data;
+};
+
+export const getTestRunById = async (projectId: number, testRunId: number) => {
+    const response = await axios.get(`${API_URL}/${projectId}/test-runs/${testRunId}`);
+    return response.data;
+};
+
+export const updateTestCaseStatus = async (projectId: number, testCaseId: number, status: string) => {
+    return axios.patch(`http://localhost:3000/projects/${projectId}/test-runs/test-cases/${testCaseId}/status`, { status });
+};
+
+export const completeTestRun = async (projectId: number, testRunId: number) => {
+    return axios.patch(`${API_URL}/${projectId}/test-runs/${testRunId}/complete`);
 };
