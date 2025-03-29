@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { TestRunStatus } from '../enums/TestRunStatus';
 
 const API_URL = `http://localhost:3000/projects`;
 
@@ -37,9 +38,17 @@ export const getTestRunById = async (projectId: number, testRunId: number) => {
     return response.data;
 };
 
-export const updateTestCaseStatus = async (projectId: number, testCaseId: number, status: string) => {
-    return axios.patch(`http://localhost:3000/projects/${projectId}/test-runs/test-cases/${testCaseId}/status`, { status });
-};
+export const updateTestCaseStatus = async (
+    projectId: number, 
+    testCaseId: number, 
+    status: TestRunStatus
+  ) => {
+    return axios.patch(
+      `http://localhost:3000/projects/${projectId}/test-runs/test-cases/${testCaseId}/status`,
+      { status }
+    );
+  };
+  
 
 export const completeTestRun = async (projectId: number, testRunId: number) => {
     return axios.patch(`${API_URL}/${projectId}/test-runs/${testRunId}/complete`);
