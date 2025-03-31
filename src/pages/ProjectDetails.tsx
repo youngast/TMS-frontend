@@ -146,7 +146,6 @@ const handleEditTestCase = async (id: number, testCaseData: Partial<TestCase>) =
         onEditSuite={handleEditSuite}
         onDeleteSuite={handleDeleteSuite}
       />
-      {/* <TextField label="Поиск" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === "Enter" && handleSearchTestCase(searchTerm)}/> */}
       <TestCasesList testCases={testCases} onCreateTestCase={handleCreateTestCase} onEditTestCase={handleEditTestCase} onDeleteTestCase={handleDeleteTestCase} />
       <Link to={`/projects/${projectId}/test-runs`}>
         <button style={{ padding: "10px 15px", background: "#1976d2", color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}>

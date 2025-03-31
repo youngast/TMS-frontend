@@ -42,6 +42,7 @@ export default function TestRunsPage() {
 
     return (
         <Container>
+            <Button onClick={()=> window.history.back()}>Назад</Button>
             <Typography variant="h4" sx={{ mb: 2 }}>
                 Тест-раны
             </Typography>

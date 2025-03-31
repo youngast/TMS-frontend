@@ -18,6 +18,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { searchTestCase } from "../api/TestCaseapi";
+import { useParams } from "react-router-dom";
 
 interface Step {
   id: string;
@@ -48,6 +49,7 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
   const [selectedTestCase, setSelectedTestCase] = useState<TestCase | null>(null);
   const [titleError, setTitleError] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const suiteId = useParams();
 
 
   const handleOpenModal = (testCase?: TestCase) => {
@@ -130,7 +132,7 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
       <Button variant="contained" sx={{ mt: 2 }} onClick={() => handleOpenModal()}>
         + Создать тест-кейс
       </Button>
-      {/* <TextField label="Поиск" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === "Enter" && searchTestCase(searchTerm)}/> */}
+      <TextField label="Поиск"value={searchTerm} sx={{ mx: 2}} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => {if (e.key === "Enter") {searchTestCase(Number(suiteId.id), searchTerm);}}}/>
       <List sx={{ mt: 2 }}>
         {filteredTestCases.map((testCase) => (
           <ListItem 

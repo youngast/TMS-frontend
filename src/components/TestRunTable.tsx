@@ -90,7 +90,7 @@ const TestRunTable: React.FC<TestRunTableProps> = ({ projectId, onEdit }) => {
               const label = statusLabels[testRun.status as TestRunStatus] || testRun.status;
 
               return (
-                <TableRow key={testRun.id}>
+                <TableRow key={testRun.id} style={{ cursor: "pointer" }} sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }} onClick={()=> navigate(`/projects/${projectId}/test-runs/${testRun.id}/execute`)}>
                   <TableCell>{testRun.id}</TableCell>
                   <TableCell>{testRun.title}</TableCell>
                   <TableCell style={{ color }}>
@@ -112,15 +112,6 @@ const TestRunTable: React.FC<TestRunTableProps> = ({ projectId, onEdit }) => {
                     >
                       <DeleteIcon />
                     </IconButton>
-                    <Button
-                      variant="outlined"
-                      startIcon={<PlayArrowIcon />}
-                      onClick={() =>
-                        navigate(`/projects/${projectId}/test-runs/${testRun.id}/execute`)
-                      }
-                    >
-                      Выполнить
-                    </Button>
                   </TableCell>
                 </TableRow>
               );
