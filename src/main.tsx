@@ -11,6 +11,7 @@ import Layout from "./components/Layout";
 import RegisterPage from "./pages/RegisterPage.tsx";
 import TestRunsPage from "./pages/TestRunPage.tsx";
 import TestRunExecutionPage from "./pages/TestRunExecutionPage.tsx";
+import { AuthProvider } from "./components/AuthContext.tsx";
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
+    <AuthProvider>
     <RouterProvider router={router} />
+    </AuthProvider>
   </StrictMode>
 );

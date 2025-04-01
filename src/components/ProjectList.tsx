@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchProjects } from "../api/api";
+import { fetchProjects, fetchCurrentUser } from "../api/api";
 import {
   Table,
   TableBody,
@@ -14,9 +14,21 @@ import {
   Card,
   CardContent,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  DialogContent,
+  TextField
 } from "@mui/material";
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CreateProjectModal from "./CreateProjectModal";
 import Filters from "./Filters";
+import { deleteProject } from "../api/Projectapi";
+import DeleteIcon from '@mui/icons-material/Delete';
+import IconButton from '@mui/material/IconButton';
+import { useAuth } from "./AuthContext";
+import { fetchMyProjects, addUserToProject, deleteUserFromProject } from "../api/Projectapi";
+
 
 interface Project {
   id: number;
@@ -38,6 +50,11 @@ export default function ProjectList() {
 
   const navigate = useNavigate();
 
+  const {user} = useAuth();
+
+  const [modalOpenProjectId, setModalOpenProjectId] = useState<number | null>(null);
+  const [memberEmail, setMemberEmail] = useState<string>("");
+
   useEffect(() => {
     loadProjects();
   }, [searchTerm, status]);
@@ -46,8 +63,8 @@ export default function ProjectList() {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchProjects();
-      setProjects(data);
+      const data = await fetchMyProjects();
+      setProjects(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Ошибка при загрузке проектов:", err);
       setError("Не удалось загрузить проекты.");
@@ -60,7 +77,25 @@ export default function ProjectList() {
     navigate(`/projects/${projectId}`);
   };
 
+  const handleDeleteProject = (projectId: number) => {
+    deleteProject(projectId).then(() => {
+      loadProjects();
+    });
+  };
 
+  const handleConfirmAddMember = async () => {
+    if (!modalOpenProjectId || !memberEmail) return;
+  
+    try {
+      await addUserToProject(modalOpenProjectId, memberEmail);
+      alert('Пользователь добавлен!');
+      setModalOpenProjectId(null);
+      setMemberEmail("");
+      loadProjects();
+    } catch (err) {
+      alert('Ошибка при добавлении пользователя');
+    }
+  };  
 
   if (loading) return <Typography>Загрузка...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
@@ -109,7 +144,30 @@ export default function ProjectList() {
                     <TableCell>{project.name}</TableCell>
                     <TableCell>{project.owner.name}</TableCell>
                     <TableCell align="right">
-                      {/* тут можно добавить кнопки "Удалить", "Редактировать" и т.д. */}
+                    {user && user.id === project.owner.id && (
+                      <>
+                      <IconButton onClick={(e)=> {e.stopPropagation(); setModalOpenProjectId(project.id);}}><MoreVertIcon/></IconButton>
+                      <IconButton
+                        color="error"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteProject(project.id);
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                      <Dialog open={modalOpenProjectId !== null} onClose={() => setModalOpenProjectId(null)}>
+                        <DialogTitle>Добавить пользователя в проект</DialogTitle>
+                        <DialogContent>
+                        <TextField label="Email пользователя" type="email" fullWidth value={memberEmail} onChange={(e) => setMemberEmail(e.target.value)}/>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={() => setModalOpenProjectId(null)}>Отмена</Button>
+                          <Button variant="contained" onClick={handleConfirmAddMember}> Добавить </Button>
+                        </DialogActions>
+                      </Dialog>
+                      </>
+                    )}
                     </TableCell>
                   </TableRow>
                 ))
@@ -136,16 +194,7 @@ export default function ProjectList() {
                     <Typography variant="h6">{project.name}</Typography>
                     <Typography variant="body2">Владелец: {project.owner.name}</Typography>
                   </CardContent>
-                  <Button
-                    variant="outlined"
-                    onClick={(e) => {
-                      e.stopPropagation(); // чтобы не сработал onClick карточки
-                      handleOpenProject(project.id);
-                    }}
-                    sx={{ m: 1 }}
-                  >
-                    Открыть
-                  </Button>
+                  <Button variant="outlined" onClick={(e) => { e.stopPropagation(); handleOpenProject(project.id);}}sx={{ m: 1 }}> Открыть</Button>
                 </Card>
               </Grid>
             ))
@@ -158,4 +207,7 @@ export default function ProjectList() {
       )}
     </>
   );
+
+
+  
 }

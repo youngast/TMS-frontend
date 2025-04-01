@@ -12,7 +12,6 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { getTestRuns, deleteTestRun } from "../api/TestRunApi";
 import { useNavigate } from "react-router-dom";
 import { TestRunStatus } from "../enums/TestRunStatus";

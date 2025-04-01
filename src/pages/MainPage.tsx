@@ -17,7 +17,7 @@ export default function MainPage({viewmode}: Projectlistprops) {
         <>
             <ProjectLayer />
             {/* <Filters onViewChange={setViewMode} onOpenCreateProject={() => setOpen(true)} /> */}
-            <ProjectList viewMode= {viewmode}/>
+            <ProjectList viewMode = {viewmode}/>
             <CreateProjectModal 
                 open={open} 
                 onClose={() => setOpen(false)} 

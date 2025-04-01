@@ -51,7 +51,7 @@ export const fetchCurrentUser = async () => {
   if (!token) return null;
 
   try {
-    const response = await axios.get(`${API_URL}/users/me`, {
+    const response = await axios.get(`http://localhost:3000/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -248,21 +248,6 @@ export const deleteTestSuite = async (projectId:number,suiteId: number) => {
   const response = await axios.delete(`http://localhost:3000/projects/${projectId}/test-suites/${suiteId}`, {
     headers: { Authorization: `Bearer ${token}` },});
   return response.data;
-};
-
-export const deleteProject = async (projectId: number) => {
-  try{
-    const token = localStorage.getItem("token");
-    if (!token) {
-      throw new Error("Токен отсутствует");
-    }
-    const response = await axios.delete(`${API_PROJECT_URL}/${projectId}`,{
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.data;
-  }catch(error){
-    console.error("Error deleting project:", error);
-  }
 };
 
 export const deleteTestCase = async (testCaseId: number) => {
