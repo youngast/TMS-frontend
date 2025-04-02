@@ -1,39 +1,25 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchProjects, fetchCurrentUser } from "../api/api";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogActions,
-  DialogContent,
-  TextField
+  Table, TableBody, TableCell, TableContainer, TableHead,
+  TableRow, Paper, Typography, Grid, Card, CardContent,
+  Button, Dialog, DialogTitle, DialogContent, DialogActions,
+  List, ListItem, ListItemText, IconButton
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import DeleteIcon from "@mui/icons-material/Delete";
 import CreateProjectModal from "./CreateProjectModal";
 import Filters from "./Filters";
-import { deleteProject } from "../api/Projectapi";
-import DeleteIcon from '@mui/icons-material/Delete';
-import IconButton from '@mui/material/IconButton';
 import { useAuth } from "./AuthContext";
-import { fetchMyProjects, addUserToProject, deleteUserFromProject } from "../api/Projectapi";
-
+import {fetchMyProjects,deleteProject,addUserToProject,deleteUserFromProject} from "../api/Projectapi";
+import UsersAutocomplete from "./UserAutocomplete";
 
 interface Project {
   id: number;
   name: string;
   owner: { id: number; name: string };
+  // Предположим, у нас есть список участников
+  members?: { id: number; email: string }[];
 }
 
 export default function ProjectList() {
@@ -42,18 +28,16 @@ export default function ProjectList() {
   const [error, setError] = useState<string | null>(null);
 
   const [modalOpen, setModalOpen] = useState(false);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [status, setStatus] = useState("active");
-
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
+  // Модалка управления участниками
+  const [membersModalOpen, setMembersModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+
   const navigate = useNavigate();
-
-  const {user} = useAuth();
-
-  const [modalOpenProjectId, setModalOpenProjectId] = useState<number | null>(null);
-  const [memberEmail, setMemberEmail] = useState<string>("");
+  const { user } = useAuth();
 
   useEffect(() => {
     loadProjects();
@@ -63,7 +47,7 @@ export default function ProjectList() {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchMyProjects();
+      const data = await fetchMyProjects(); // ваш API
       setProjects(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Ошибка при загрузке проектов:", err);
@@ -83,25 +67,43 @@ export default function ProjectList() {
     });
   };
 
-  const handleConfirmAddMember = async () => {
-    if (!modalOpenProjectId || !memberEmail) return;
-  
+  // Открыть/закрыть модалку участников
+  const openMembersModal = (e: React.MouseEvent, project: Project) => {
+    e.stopPropagation();
+    setSelectedProject(project);
+    setMembersModalOpen(true);
+  };
+  const closeMembersModal = () => {
+    setMembersModalOpen(false);
+    setSelectedProject(null);
+  };
+
+  const handleSelectUser = async (newUser: { id: number; email: string } | null) => {
+    if (!newUser || !selectedProject) return;
     try {
-      await addUserToProject(modalOpenProjectId, memberEmail);
-      setModalOpenProjectId(null);
-      setMemberEmail("");
-      loadProjects();
+      await addUserToProject(selectedProject.id, newUser.email);
+      await loadProjects();
     } catch (err) {
-      alert('Ошибка при добавлении пользователя');
+      alert("Ошибка при добавлении пользователя");
     }
-  };  
+  };
+
+  // Удалить участника
+  const handleRemoveMember = async (userEmail: string) => {
+    if (!selectedProject) return;
+    try {
+      await deleteUserFromProject(selectedProject.id, userEmail);
+      await loadProjects();
+    } catch (err) {
+      alert("Ошибка при удалении пользователя");
+    }
+  };
 
   if (loading) return <Typography>Загрузка...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (
     <>
-      {/* Компонент фильтров */}
       <Filters
         searchTerm={searchTerm}
         status={status}
@@ -112,16 +114,52 @@ export default function ProjectList() {
         onOpenCreateProject={() => setModalOpen(true)}
       />
 
-      {/* Модальное окно создания проекта */}
       <CreateProjectModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onProjectCreated={loadProjects}
       />
 
+      {/* Модалка "Управление участниками" */}
+      <Dialog open={membersModalOpen} onClose={closeMembersModal} sx={ { "& .MuiDialog-paper": { width: "80%" } }}>
+        <DialogTitle>Управление участниками</DialogTitle>
+        <DialogContent>
+          {selectedProject && (
+            <>
+              <Typography variant="h6" sx={{ mb: 1 }}>
+                {selectedProject.name}
+              </Typography>
 
+              {/* Список участников */}
+              {selectedProject.members && selectedProject.members.length > 0 ? (
+                <List>
+                  {selectedProject.members.map((m) => (
+                    <ListItem
+                      key={m.id}
+                      secondaryAction={
+                        <Button color="error" onClick={() => handleRemoveMember(m.email)}>
+                          Удалить
+                        </Button>
+                      }
+                    >
+                      <ListItemText primary={m.email} />
+                    </ListItem>
+                  ))}
+                </List>
+              ) : (
+                <Typography>Пока нет участников</Typography>
+              )}
 
-      {/* Отображение проектов в зависимости от viewMode */}
+              {/* Автокомплит для добавления нового участника */}
+              <UsersAutocomplete onUserSelect={handleSelectUser} />
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeMembersModal}>Закрыть</Button>
+        </DialogActions>
+      </Dialog>
+
       {viewMode === "list" ? (
         <TableContainer component={Paper} sx={{ mt: 2 }}>
           <Table>
@@ -142,31 +180,23 @@ export default function ProjectList() {
                   >
                     <TableCell>{project.name}</TableCell>
                     <TableCell>{project.owner.name}</TableCell>
-                    <TableCell align="right">
-                    {user && user.id === project.owner.id && (
-                      <>
-                      <IconButton onClick={(e)=> {e.stopPropagation(); setModalOpenProjectId(project.id);}}><MoreVertIcon/></IconButton>
-                      <IconButton
-                        color="error"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteProject(project.id);
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                      <Dialog open={modalOpenProjectId !== null} onClose={() => setModalOpenProjectId(null)}>
-                        <DialogTitle>Добавить пользователя в проект</DialogTitle>
-                        <DialogContent>
-                        <TextField label="Email пользователя" type="email" fullWidth value={memberEmail} onChange={(e) => setMemberEmail(e.target.value)}/>
-                        </DialogContent>
-                        <DialogActions>
-                          <Button onClick={() => setModalOpenProjectId(null)}>Отмена</Button>
-                          <Button variant="contained" onClick={handleConfirmAddMember}> Добавить </Button>
-                        </DialogActions>
-                      </Dialog>
-                      </>
-                    )}
+                    <TableCell align="right" onClick={(e) => e.stopPropagation()}>
+                      {user && user.id === project.owner.id && (
+                        <>
+                          <IconButton onClick={(e) => openMembersModal(e, project)}>
+                            <MoreVertIcon />
+                          </IconButton>
+                          <IconButton
+                            color="error"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteProject(project.id);
+                            }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))
@@ -191,7 +221,9 @@ export default function ProjectList() {
                 >
                   <CardContent>
                     <Typography variant="h6">{project.name}</Typography>
-                    <Typography variant="body2">Владелец: {project.owner.name}</Typography>
+                    <Typography variant="body2">
+                      Владелец: {project.owner.name}
+                    </Typography>
                   </CardContent>
                 </Card>
               </Grid>
@@ -205,7 +237,4 @@ export default function ProjectList() {
       )}
     </>
   );
-
-
-  
 }

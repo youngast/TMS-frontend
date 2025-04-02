@@ -74,7 +74,6 @@ const TestRunTable: React.FC<TestRunTableProps> = ({ projectId, onEdit }) => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>ID</TableCell>
             <TableCell>Название</TableCell>
             <TableCell>Статус</TableCell>
             <TableCell>Дата создания</TableCell>
@@ -90,7 +89,6 @@ const TestRunTable: React.FC<TestRunTableProps> = ({ projectId, onEdit }) => {
 
               return (
                 <TableRow key={testRun.id} style={{ cursor: "pointer" }} sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }} onClick={()=> navigate(`/projects/${projectId}/test-runs/${testRun.id}/execute`)}>
-                  <TableCell>{testRun.id}</TableCell>
                   <TableCell>{testRun.title}</TableCell>
                   <TableCell style={{ color }}>
                     {label}

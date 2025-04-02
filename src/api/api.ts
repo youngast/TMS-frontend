@@ -281,20 +281,14 @@ export const addUserToProject = async (projectId: number, userId: number) => {
 
 
 
-export const fetchUsers = async (id?: number, email?: string) => {
+export const fetchUsers = async (email: string) => {
   const token = localStorage.getItem("token");
   if (!token) {
     throw new Error("Токен отсутствует");
   }
-
-  const params: Record<string, any> = {};
-  if (id) params.id = id;
-  if (email) params.email = email;
-
-  const response = await axios.get(`${API_URL}/users`, {
+  const response = await axios.get(`http://localhost:3000/users/`, {
     headers: { Authorization: `Bearer ${token}` },
-    params,
+    params: { email },
   });
-
   return response.data;
 };

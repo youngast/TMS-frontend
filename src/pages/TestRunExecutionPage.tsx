@@ -27,7 +27,7 @@ export default function TestRunExecutionPage() {
   const { projectId, testRunId } = useParams();
   const navigate = useNavigate();
   const [testRun, setTestRun] = useState<any>(null);
-  const [testCaseStatuses, setTestCaseStatuses] = useState<{ [key: number]: string }>({});
+  const [testCaseStatuses, setTestCaseStatuses] = useState<{[key: number]: TestRunStatus;}>({});
   const [testCaseComments, setTestCaseComments] = useState<{ [key: number]: string }>({});
   const [saving, setSaving] = useState(false);
 
@@ -53,9 +53,9 @@ export default function TestRunExecutionPage() {
     }
   };
 
-  const handleStatusChange = (testCaseId: number, status: string) => {
-    setTestCaseStatuses((prev) => ({ ...prev, [testCaseId]: status }));
-  };
+  function handleStatusChange(testCaseId: number, status: TestRunStatus) {
+    setTestCaseStatuses(prev => ({ ...prev, [testCaseId]: status }));
+  }  
 
   const handleSave = async () => {
     const pid = Number(projectId);
@@ -66,6 +66,7 @@ export default function TestRunExecutionPage() {
     try {
       for (const testCase of testRun.testCases) {
         const status = testCaseStatuses[testCase.id];
+        await updateTestCaseStatus(pid, testCase.id, status);
       }
       await completeTestRun(pid, tid);
       navigate(`/projects/${projectId}/test-runs`);
@@ -100,9 +101,8 @@ export default function TestRunExecutionPage() {
             </Box>
             <Select
               value={testCaseStatuses[testCase.id] || TestRunStatus.ONWORK}
-              onChange={(e) => handleStatusChange(testCase.id, e.target.value as string)} // STOP propagation
-              sx={{ minWidth: 150 }}
-            >
+              onChange={(e) => handleStatusChange(testCase.id, e.target.value as TestRunStatus)}
+              sx={{ minWidth: 150 }} disabled={testRun.status !== TestRunStatus.ONWORK}>
               <MenuItem value={TestRunStatus.PASSED}>Успешно</MenuItem>
               <MenuItem value={TestRunStatus.FAILED}>Провален</MenuItem>
               <MenuItem value={TestRunStatus.SKIPPED}>Пропущен</MenuItem>
