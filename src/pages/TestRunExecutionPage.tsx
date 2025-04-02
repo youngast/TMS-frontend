@@ -6,168 +6,146 @@ import {
   completeTestRun,
 } from "../api/TestRunApi";
 import {
-  Button,
   Container,
   Typography,
-  List,
-  ListItem,
-  ListItemText,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
   Select,
   MenuItem,
+  Button,
+  Box,
+  TextField,
+  Chip,
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import IconButton from "@mui/material/IconButton";
 import { TestRunStatus } from "../enums/TestRunStatus";
 
 export default function TestRunExecutionPage() {
   const { projectId, testRunId } = useParams();
   const navigate = useNavigate();
   const [testRun, setTestRun] = useState<any>(null);
-  const [testCaseStatuses, setTestCaseStatuses] = useState<{
-    [key: number]: string;
-  }>({});
+  const [testCaseStatuses, setTestCaseStatuses] = useState<{ [key: number]: string }>({});
+  const [testCaseComments, setTestCaseComments] = useState<{ [key: number]: string }>({});
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!projectId || !testRunId) {
-      console.error("Ошибка: projectId или testRunId отсутствуют", {
-        projectId,
-        testRunId,
-      });
-      return;
-    }
-    fetchTestRun();
+    if (projectId && testRunId) fetchTestRun();
   }, [projectId, testRunId]);
 
   const fetchTestRun = async () => {
     const pid = Number(projectId);
     const tid = Number(testRunId);
-
-    if (isNaN(pid) || isNaN(tid)) {
-      console.error("Ошибка: projectId или testRunId не являются числами", {
-        projectId,
-        testRunId,
-      });
-      return;
-    }
+    if (isNaN(pid) || isNaN(tid)) return;
 
     try {
       const data = await getTestRunById(pid, tid);
       setTestRun(data);
-
-      const initialStatuses = data.testCases.reduce(
-        (acc: any, testCase: any) => {
-          acc[testCase.id] = testCase.status || TestRunStatus.ONWORK;
-          return acc;
-        },
-        {}
-      );
+      const initialStatuses = data.testCases.reduce((acc: any, testCase: any) => {
+        acc[testCase.id] = testCase.status || TestRunStatus.ONWORK;
+        return acc;
+      }, {});
       setTestCaseStatuses(initialStatuses);
-    } catch (error) {
-      console.error("Ошибка при загрузке тест-рана:", error);
+    } catch (err) {
+      console.error("Ошибка при загрузке тест-рана:", err);
     }
   };
 
   const handleStatusChange = (testCaseId: number, status: string) => {
-    setTestCaseStatuses((prevState) => ({
-      ...prevState,
-      [testCaseId]: status,
-    }));
+    setTestCaseStatuses((prev) => ({ ...prev, [testCaseId]: status }));
   };
 
   const handleSave = async () => {
     const pid = Number(projectId);
     const tid = Number(testRunId);
+    if (!testRun || isNaN(pid) || isNaN(tid)) return;
 
-    if (!projectId || !testRunId) {
-      console.error("Ошибка: projectId или testRunId отсутствуют", {
-        projectId,
-        testRunId,
-      });
-      return;
-    }
-
-    if (isNaN(pid) || isNaN(tid)) {
-      console.error("Ошибка: projectId или testRunId не являются числами", {
-        projectId,
-        testRunId,
-      });
-      return;
-    }
-
-    if (Object.keys(testCaseStatuses).length !== testRun.testCases.length) {
-      console.error("Ошибка: не все тест-кейсы были обновлены", {
-        testCaseStatuses,
-        testRun,
-      });
-      return;
-    }
-
+    setSaving(true);
     try {
       for (const testCase of testRun.testCases) {
         const status = testCaseStatuses[testCase.id];
-
-        switch (status) {
-          case TestRunStatus.PASSED:
-            await updateTestCaseStatus(pid, testCase.id, TestRunStatus.PASSED);
-            break;
-          case TestRunStatus.FAILED:
-            await updateTestCaseStatus(pid, testCase.id, TestRunStatus.FAILED);
-            break;
-          case TestRunStatus.SKIPPED:
-            await updateTestCaseStatus(
-              pid,
-              testCase.id,
-              TestRunStatus.SKIPPED
-            );
-            break;
-          default:
-            await updateTestCaseStatus(pid, testCase.id, TestRunStatus.ONWORK);
-            break;
-        }
       }
-
       await completeTestRun(pid, tid);
-
       navigate(`/projects/${projectId}/test-runs`);
-    } catch (error) {
-      console.error("Ошибка при сохранении тест-рана:", error);
+    } catch (err) {
+      console.error("Ошибка при сохранении тест-рана:", err);
+    } finally {
+      setSaving(false);
     }
   };
 
   if (!testRun) return <Typography>Загрузка...</Typography>;
 
   return (
-    <Container>
-      <Typography variant="h4" sx={{ mb: 2 }}>
-        Выполнение тест-рана: {testRun.title}
-      </Typography>
+    <Container sx={{ py: 4 }}>
+        <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+        <IconButton onClick={() => navigate(-1)} sx={{ mr: 1 }}>
+            <ArrowBackIcon />
+        </IconButton>
+        <Typography variant="h4">
+            Выполнение тест-рана: {testRun.title}
+        </Typography>
+        </Box>
 
-      <List>
-        {testRun.testCases.map((testCase: any) => (
-          <ListItem key={testCase.id}>
-            <ListItemText
-              primary={testCase.title}
-              secondary={testCase.description}
-            />
+      {testRun.testCases.map((testCase: any) => (
+        <Accordion key={testCase.id} sx={{ mb: 2 }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}> 
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="subtitle1">{testCase.title}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {testCase.description}
+              </Typography>
+            </Box>
             <Select
               value={testCaseStatuses[testCase.id] || TestRunStatus.ONWORK}
-              onChange={(e) =>
-                handleStatusChange(testCase.id, e.target.value as string)
-              }
+              onChange={(e) => handleStatusChange(testCase.id, e.target.value as string)} // STOP propagation
+              sx={{ minWidth: 150 }}
             >
               <MenuItem value={TestRunStatus.PASSED}>Успешно</MenuItem>
               <MenuItem value={TestRunStatus.FAILED}>Провален</MenuItem>
               <MenuItem value={TestRunStatus.SKIPPED}>Пропущен</MenuItem>
             </Select>
-          </ListItem>
-        ))}
-      </List>
+          </AccordionSummary>
 
+          <AccordionDetails>
+            {testCase.steps.map((step: any, index: number) => (
+              <Box
+                key={step.id}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  px: 2,
+                  py: 1,
+                  backgroundColor: "#f9f9f9",
+                  borderRadius: 1,
+                  mb: 1,
+                  border: "1px solid #eee",
+                }}
+              >
+                <Typography variant="body2" sx={{ flexBasis: "60%" }}>
+                  <b>Шаг {index + 1}:</b> {step.step}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ flexBasis: "40%", textAlign: "right" }}
+                >
+                  <b>Ожидается:</b> {step.expectedResult}
+                </Typography>
+              </Box>
+            ))}
+          </AccordionDetails>
+        </Accordion>
+      ))}
       <Button
         variant="contained"
         color="primary"
         onClick={handleSave}
-        sx={{ mt: 2 }}
-      >
-        Завершить тест-ран
+        disabled={saving}>
+        {saving ? "Сохраняем..." : "Завершить тест-ран"}
       </Button>
     </Container>
   );

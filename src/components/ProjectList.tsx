@@ -20,7 +20,7 @@ import {
   DialogContent,
   TextField
 } from "@mui/material";
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CreateProjectModal from "./CreateProjectModal";
 import Filters from "./Filters";
 import { deleteProject } from "../api/Projectapi";
@@ -88,7 +88,6 @@ export default function ProjectList() {
   
     try {
       await addUserToProject(modalOpenProjectId, memberEmail);
-      alert('Пользователь добавлен!');
       setModalOpenProjectId(null);
       setMemberEmail("");
       loadProjects();
@@ -194,7 +193,6 @@ export default function ProjectList() {
                     <Typography variant="h6">{project.name}</Typography>
                     <Typography variant="body2">Владелец: {project.owner.name}</Typography>
                   </CardContent>
-                  <Button variant="outlined" onClick={(e) => { e.stopPropagation(); handleOpenProject(project.id);}}sx={{ m: 1 }}> Открыть</Button>
                 </Card>
               </Grid>
             ))

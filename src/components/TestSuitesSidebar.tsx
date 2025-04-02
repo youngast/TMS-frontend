@@ -17,7 +17,9 @@ import {
   TextField,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useNavigate } from "react-router-dom";
 
 interface TestSuite {
   id: number;
@@ -44,6 +46,8 @@ export default function TestSuitesSidebar({
   const [editSuite, setEditSuite] = useState<{ id: number; name: string } | null>(null);
   const [newSuiteName, setNewSuiteName] = useState("");
 
+  const navigate = useNavigate();
+
   return (
     <Drawer
       variant="permanent"
@@ -51,10 +55,12 @@ export default function TestSuitesSidebar({
         width: 250,
         flexShrink: 0,
         "& .MuiDrawer-paper": { width: 250, position: "relative" },
-      }}
-    >
+        }}>
       <Box sx={{ p: 2 }}>
-        <Typography variant="h6">Тест-сьюты</Typography>
+        <IconButton onClick={() => navigate("/")} sx={{ mr: 1 }}>
+          <ArrowBackIcon />
+        </IconButton>
+        <Typography variant="h5">Тест-сьюты</Typography>
 
         {/* Поле ввода для названия нового тест-сьюта */}
         <TextField
@@ -87,8 +93,7 @@ export default function TestSuitesSidebar({
               <ListItemButton
                 selected={selectedSuiteId === suite.id}
                 onClick={() => onSelectSuite(suite.id)}
-                sx={{ display: "flex", justifyContent: "space-between" }}
-              >
+                sx={{ display: "flex", justifyContent: "space-between" }}>
                 <ListItemText primary={suite.name} />
                 <Box>
                   <IconButton size="small" onClick={() => setEditSuite(suite)}>
@@ -121,10 +126,7 @@ export default function TestSuitesSidebar({
               if (editSuite) {
                 onEditSuite(editSuite.id, editSuite.name);
                 setEditSuite(null);
-              }
-            }}
-            color="primary"
-          >
+              }}}color="primary">
             Сохранить
           </Button>
         </DialogActions>

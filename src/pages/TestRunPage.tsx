@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { getTestRuns, deleteTestRun } from "../api/TestRunApi";
-import { Button, Container, Typography, Stack, CircularProgress, Snackbar, Alert } from "@mui/material";
+import { Button, Container, Typography, Stack, CircularProgress, Snackbar, Alert, Box } from "@mui/material";
 import TestRunTable from "../components/TestRunTable";
 import TestRunModal from "../components/TestRunModal";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import IconButton from "@mui/material/IconButton";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 export default function TestRunsPage() {
     const { id } = useParams();
@@ -14,6 +16,8 @@ export default function TestRunsPage() {
     const [selectedRun, setSelectedRun] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchTestRuns();
@@ -42,10 +46,14 @@ export default function TestRunsPage() {
 
     return (
         <Container>
-            <Button onClick={()=> window.history.back()}>Назад</Button>
-            <Typography variant="h4" sx={{ mb: 2 }}>
-                Тест-раны
-            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+            <IconButton onClick={() => navigate(-1)} sx={{ mr: 1 }}>
+            <ArrowBackIcon />
+            </IconButton>
+                <Typography variant="h4">
+                    Тест-раны
+                </Typography>
+            </Box>
 
             {error && (
                 <Snackbar open autoHideDuration={4000} onClose={() => setError(null)}>
