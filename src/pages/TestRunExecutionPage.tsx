@@ -140,13 +140,15 @@ export default function TestRunExecutionPage() {
           </AccordionDetails>
         </Accordion>
       ))}
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleSave}
-        disabled={saving}>
-        {saving ? "Сохраняем..." : "Завершить тест-ран"}
-      </Button>
+      {testRun.status === TestRunStatus.ONWORK && (
+              <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSave}
+              disabled={saving}>
+              {saving ? "Сохраняем..." : "Завершить тест-ран"}
+            </Button>
+      )}
     </Container>
   );
 }

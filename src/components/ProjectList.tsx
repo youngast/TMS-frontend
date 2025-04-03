@@ -18,7 +18,6 @@ interface Project {
   id: number;
   name: string;
   owner: { id: number; name: string };
-  // Предположим, у нас есть список участников
   members?: { id: number; email: string }[];
 }
 
@@ -32,7 +31,6 @@ export default function ProjectList() {
   const [status, setStatus] = useState("active");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
-  // Модалка управления участниками
   const [membersModalOpen, setMembersModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
@@ -67,7 +65,6 @@ export default function ProjectList() {
     });
   };
 
-  // Открыть/закрыть модалку участников
   const openMembersModal = (e: React.MouseEvent, project: Project) => {
     e.stopPropagation();
     setSelectedProject(project);
@@ -82,22 +79,68 @@ export default function ProjectList() {
     if (!newUser || !selectedProject) return;
     try {
       await addUserToProject(selectedProject.id, newUser.email);
-      await loadProjects();
+      setSelectedProject((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          members: [
+            ...(prev.members || []),
+            {
+              id: newUser.id,
+              email: newUser.email,
+            },
+          ],
+        };
+      });
+      setProjects((prev) =>
+        prev.map((proj) =>
+          proj.id === selectedProject.id
+            ? {
+                ...proj,
+                members: [
+                  ...(proj.members || []),
+                  {
+                    id: newUser.id,
+                    email: newUser.email,
+                  },
+                ],
+              }
+            : proj
+        )
+      );
     } catch (err) {
       alert("Ошибка при добавлении пользователя");
     }
   };
+  
 
-  // Удалить участника
   const handleRemoveMember = async (userEmail: string) => {
     if (!selectedProject) return;
     try {
       await deleteUserFromProject(selectedProject.id, userEmail);
-      await loadProjects();
+        setSelectedProject((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          members: (prev.members || []).filter((m) => m.email !== userEmail),
+        };
+      });
+  
+      setProjects((prev) =>
+        prev.map((proj) =>
+          proj.id === selectedProject.id
+            ? {
+                ...proj,
+                members: (proj.members || []).filter((m) => m.email !== userEmail),
+              }
+            : proj
+        )
+      );
     } catch (err) {
       alert("Ошибка при удалении пользователя");
     }
   };
+  
 
   if (loading) return <Typography>Загрузка...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
@@ -137,11 +180,8 @@ export default function ProjectList() {
                     <ListItem
                       key={m.id}
                       secondaryAction={
-                        <Button color="error" onClick={() => handleRemoveMember(m.email)}>
-                          Удалить
-                        </Button>
-                      }
-                    >
+                        <Button color="error" onClick={() => handleRemoveMember(m.email)}>Удалить</Button>
+                        }>
                       <ListItemText primary={m.email} />
                     </ListItem>
                   ))}

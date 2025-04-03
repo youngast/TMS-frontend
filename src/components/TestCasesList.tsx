@@ -149,7 +149,7 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
       </List>
 
       {/* Модальное окно */}
-      <Dialog open={modalOpen} onClose={handleCloseModal} fullWidth maxWidth="sm">
+      <Dialog open={modalOpen} onClose={handleCloseModal} fullWidth maxWidth="lg">
         <DialogTitle>{isEditing ? "Редактировать тест-кейс" : "Создать тест-кейс"}</DialogTitle>
         <DialogContent>
           <TextField
