@@ -97,7 +97,7 @@ export default function TestRunModal({
         const newTestRun = await createTestRun(projectId, {
           title,
           description,
-          testSuiteId: selectedSuiteId,
+          testSuiteId: selectedSuiteId ?? undefined,
           testCaseIds: selectedTestCases.length > 0 ? selectedTestCases : [],
         });
 
@@ -171,10 +171,10 @@ export default function TestRunModal({
         </FormGroup>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={loading}>
+        <Button onClick={onClose} disabled={loading} sx={{ mr: 1, color:'#BA3CCD' }}>
           Отмена
         </Button>
-        <Button variant="contained" color="primary" onClick={handleSubmit} disabled={loading}>
+        <Button variant="contained" color="primary" onClick={handleSubmit} disabled={loading} sx={{bgcolor: '#BA3CCD'}}>
           {loading ? "Сохранение..." : "Сохранить"}
         </Button>
       </DialogActions>

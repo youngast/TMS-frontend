@@ -28,7 +28,7 @@ export default function CreateTestRunModal({ suiteId, caseId, onClose }: { suite
         <TextField label="Название тест-рана" fullWidth value={title} onChange={(e) => setTitle(e.target.value)} sx={{ mt: 2 }} />
         <TextField label="Описание" fullWidth multiline rows={3} value={description} onChange={(e) => setDescription(e.target.value)} sx={{ mt: 2 }} />
         {error && <Typography color="error">{error}</Typography>}
-        <Button variant="contained" color="primary" onClick={handleCreate} sx={{ mt: 2 }}>🚀 Запустить</Button>
+        <Button variant="contained" color="primary" onClick={handleCreate} sx={{ mt: 2 }}>Запустить</Button>
       </Box>
     </Modal>
   );

@@ -63,6 +63,7 @@ export default function LoginPage() {
           fullWidth
           margin="normal"
           value={email}
+          type="email"
           onChange={(e) => setEmail(e.target.value)}
         />
         <TextField
@@ -76,16 +77,15 @@ export default function LoginPage() {
         <Button 
           variant="contained" 
           fullWidth 
-          sx={{ mt: 2 }} 
+          sx={{ mt: 2, bgcolor:'#BA3CCD' }} 
           onClick={handleLogin} 
-          disabled={loading}
-        >
+          disabled={loading}>
           {loading ? "Вход..." : "Войти"}
         </Button>
 
         <Typography variant="body2" sx={{ mt: 2 }}>
           Нет аккаунта?{" "}
-          <Button variant="text" onClick={() => navigate("/register")}>
+          <Button variant="text" sx={{color:'#BA3CCD'}} onClick={() => navigate("/register")}>
             Зарегистрироваться
           </Button>
         </Typography>

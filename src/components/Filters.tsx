@@ -14,27 +14,22 @@ import AppsIcon from "@mui/icons-material/Apps";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import { findProjectByName } from "../api/Projectapi";
 
-/** Описание полей вашего проекта (можно дополнить) */
 interface Project {
   id: number;
   name: string;
-  // ...
 }
 
-/** Пропсы компонента Filters */
 interface FiltersProps {
-  // Текущий статус
   status: string;
-  // Текущий вид (list или grid)
   viewMode: "list" | "grid";
+  searchTerm: string;
 
-  // Колбэки от родителя
+  onSearchChange: (searchTerm: string) => void;
   onStatusChange: (newStatus: string) => void;
   onViewChange: (view: "list" | "grid") => void;
   onOpenCreateProject: () => void;
 }
 
-/** Компонент Filters, который теперь ищет проекты через query-параметр (findProjectByName) */
 export default function Filters({
   status,
   viewMode,
@@ -42,14 +37,11 @@ export default function Filters({
   onViewChange,
   onOpenCreateProject,
 }: FiltersProps) {
-  // Локальное поле для строки поиска
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Результаты поиска (массив) и ошибка
   const [foundProjects, setFoundProjects] = useState<Project[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  /** Вызываем API при поиске */
   const handleSearch = async () => {
     try {
       setError(null);
@@ -133,7 +125,6 @@ export default function Filters({
 
       </Box>
 
-      {/* Выводим ошибку (если есть) */}
       {error && <Typography color="error">{error}</Typography>}
 
       {/* Показ результатов, если пользователь уже искал */}
@@ -150,7 +141,6 @@ export default function Filters({
         </Box>
       )}
 
-      {/* Если искали и ничего не найдено */}
       {foundProjects && foundProjects.length === 0 && (
         <Typography>По вашему запросу ничего не найдено</Typography>
       )}

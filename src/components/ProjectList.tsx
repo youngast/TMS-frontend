@@ -6,13 +6,13 @@ import {
   Button, Dialog, DialogTitle, DialogContent, DialogActions,
   List, ListItem, ListItemText, IconButton
 } from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CreateProjectModal from "./CreateProjectModal";
 import Filters from "./Filters";
 import { useAuth } from "./AuthContext";
 import {fetchMyProjects,deleteProject,addUserToProject,deleteUserFromProject} from "../api/Projectapi";
 import UsersAutocomplete from "./UserAutocomplete";
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 
 interface Project {
   id: number;
@@ -224,7 +224,7 @@ export default function ProjectList() {
                       {user && user.id === project.owner.id && (
                         <>
                           <IconButton onClick={(e) => openMembersModal(e, project)}>
-                            <MoreVertIcon />
+                            <PersonAddAltIcon />
                           </IconButton>
                           <IconButton
                             color="error"

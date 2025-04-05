@@ -39,6 +39,7 @@ export default function ProjectDetailsModal({ open, projectId, onClose }: Projec
     }
   }, [projectId]);
 
+
   const handleAddUser = async () => {
     if (!selectedUser || !projectId) return;
     try {

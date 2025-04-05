@@ -3,7 +3,6 @@ import { useParams, Link } from "react-router-dom";
 import { fetchProjectById, fetchTestSuitesByProjectId, createTestSuite, updateTestSuite, deleteTestSuite, fetchTestCasesBySuiteId, createTestCase, updateTestCase, deleteTestCase } from "../api/api";
 import TestSuitesSidebar from "../components/TestSuitesSidebar";
 import TestCasesList from "../components/TestCasesList";
-import TestRunsPage from "./TestRunPage";
 
 export interface Step {
   id: string;
@@ -21,6 +20,14 @@ interface TestCase {
   updatedAt: string;
 }
 
+export interface UpdateTestCaseDto {
+  title?: string;
+  description?: string;
+  steps?: Step[];
+  expectedResult?: string;
+  status?: string;
+}
+
 
 export default function ProjectDetails() {
   const { id } = useParams<{ id?: string }>();
@@ -36,6 +43,8 @@ export default function ProjectDetails() {
     status: "new",
   });
   const [testCases, setTestCases] = useState<TestCase[]>([]);
+  const [filter, setFilter] = useState("");
+
 
   useEffect(() => {
     if (!isNaN(projectId)) {
@@ -93,7 +102,7 @@ export default function ProjectDetails() {
     try {
         const formattedTestCaseData = {
             ...testCaseData,
-            steps: [...testCaseData.steps],  // <-- убедись, что тут steps не пустой
+            steps: [...testCaseData.steps],
         };
         console.log("Отправляем данные на создание тест-кейса:", formattedTestCaseData);
 
@@ -136,6 +145,10 @@ const handleEditTestCase = async (id: number, testCaseData: Partial<TestCase>) =
     }
   };
 
+  const filteredTestCases = testCases.filter(tc =>
+    tc.title.toLowerCase().includes(filter.toLowerCase())
+  );  
+
   return (
     <div style={{ display: "flex" }}>
       <TestSuitesSidebar
@@ -146,9 +159,9 @@ const handleEditTestCase = async (id: number, testCaseData: Partial<TestCase>) =
         onEditSuite={handleEditSuite}
         onDeleteSuite={handleDeleteSuite}
       />
-      <TestCasesList testCases={testCases} onCreateTestCase={handleCreateTestCase} onEditTestCase={handleEditTestCase} onDeleteTestCase={handleDeleteTestCase} />
+      <TestCasesList testCases={testCases} onCreateTestCase={handleCreateTestCase} onEditTestCase={handleEditTestCase} onDeleteTestCase={handleDeleteTestCase}/>
       <Link to={`/projects/${projectId}/test-runs`}>
-        <button style={{ padding: "10px 15px", background: "#1976d2", color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}>
+        <button style={{ padding: "10px 15px", background: "#1976d2", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", backgroundColor: "#BA3CCD", }}>
           Перейти в Test Run
         </button>
       </Link>    

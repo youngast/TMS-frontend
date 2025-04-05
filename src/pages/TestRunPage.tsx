@@ -63,7 +63,7 @@ export default function TestRunsPage() {
 
             {/* Кнопка создания тест-рана */}
             <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
-                <Button variant="contained" color="primary" onClick={() => setOpenModal(true)}>
+                <Button variant="contained" sx={{bgcolor:'#BA3CCD'}} onClick={() => setOpenModal(true)}>
                     Создать тест-ран
                 </Button>
             </Stack>

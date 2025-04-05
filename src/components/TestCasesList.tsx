@@ -19,6 +19,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { searchTestCase } from "../api/TestCaseapi";
 import { useParams } from "react-router-dom";
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 interface Step {
   id: string;
@@ -50,6 +52,16 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
   const [titleError, setTitleError] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const suiteId = useParams();
+
+  const statusLabels: Record<string, string> = {
+    PASSED: "Успешно",
+    FAILED: "Провален",
+    SKIPPED: "Пропущен",
+    ONWORK: "В процессе",
+  }
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
 
   const handleOpenModal = (testCase?: TestCase) => {
@@ -124,29 +136,61 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
     testCase.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredTestCases.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredTestCases.length / itemsPerPage);
 
   return (
     <Box sx={{ flex: 1, p: 3 }}>
       <Typography variant="h5">{"Проект"}</Typography>
       
-      <Button variant="contained" sx={{ mt: 2 }} onClick={() => handleOpenModal()}>
+      <Button variant="contained" sx={{ mt: 2, bgcolor: '#BA3CCD' }} onClick={() => handleOpenModal()}>
         + Создать тест-кейс
       </Button>
       <TextField label="Поиск"value={searchTerm} sx={{ mx: 2}} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => {if (e.key === "Enter") {searchTestCase(Number(suiteId.id), searchTerm);}}}/>
       <List sx={{ mt: 2 }}>
-        {filteredTestCases.map((testCase) => (
-          <ListItem 
-            key={testCase.id} 
-            sx={{ display: "flex", justifyContent: "space-between", cursor: "pointer" }} 
+        {currentItems.map((testCase) => (
+          <ListItem
+            key={testCase.id}
+            sx={{ display: "flex", justifyContent: "space-between", cursor: "pointer" }}
             component="li"
-            onClick={() => handleOpenModal(testCase)}>
-            <ListItemText primary={testCase.title} secondary={`Статус: ${testCase.status}`} />
-            <IconButton onClick={(e) => { e.stopPropagation(); onDeleteTestCase(testCase.id); }} color="error">
+            onClick={() => handleOpenModal(testCase)}
+          >
+            <ListItemText
+              primary={testCase.title}
+              secondary={`Статус: ${statusLabels[testCase.status] || testCase.status}`}
+            />
+            <IconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteTestCase(testCase.id);
+              }}
+              color="error"
+            >
               <DeleteIcon />
             </IconButton>
           </ListItem>
         ))}
       </List>
+
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 1 }}>
+      <Button
+        variant="outlined"
+        disabled={currentPage === 1}
+        onClick={() => setCurrentPage(currentPage - 1)}
+        sx={{ borderColor: '#BA3CCD', color: '#BA3CCD' }}><KeyboardArrowLeftIcon/>
+      </Button>
+      <Typography sx={{ mt: 1.2 }}>{`Страница ${currentPage} из ${totalPages}`}</Typography>
+      <Button
+        variant="outlined"
+        disabled={currentPage === totalPages}
+        onClick={() => setCurrentPage(currentPage + 1)}
+        sx={{ borderColor: '#BA3CCD', color: '#BA3CCD' }}><KeyboardArrowRightIcon/>      
+      </Button>
+    </Box>
+
 
       {/* Модальное окно */}
       <Dialog open={modalOpen} onClose={handleCloseModal} fullWidth maxWidth="lg">
@@ -172,7 +216,7 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
           />
 
           <Typography variant="subtitle1" sx={{ mt: 2 }}>Шаги:</Typography>
-          <Button onClick={handleAddStep} variant="outlined" sx={{ mb: 2 }}>+ Добавить шаг</Button>
+          <Button onClick={handleAddStep} variant="outlined" sx={{ mb: 2, color: '#BA3CCD', borderColor: '#BA3CCD' }}>+ Добавить шаг</Button>
 
           <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="steps">
@@ -237,18 +281,19 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
 
           <Select
             fullWidth
-            value={selectedTestCase?.status || "new"}
+            value={selectedTestCase?.status ?? "new"}
             onChange={(e) => setSelectedTestCase((prev) => (prev ? { ...prev, status: e.target.value } : prev))}
-            sx={{ mt: 2 }}
-          >
-            <MenuItem value="new">Новый</MenuItem>
-            <MenuItem value="in_progress">В процессе</MenuItem>
-            <MenuItem value="completed">Завершен</MenuItem>
+            sx={{ mt: 2 }}>
+            {Object.entries(statusLabels).map(([value, label]) => (
+              <MenuItem key={value} value={value}>
+                {label}
+              </MenuItem>
+            ))}
           </Select>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseModal}>Отмена</Button>
-          <Button onClick={handleSave} color="primary">Сохранить</Button>
+          <Button onClick={handleCloseModal} sx={{color:'#BA3CCD'}}>Отмена</Button>
+          <Button onClick={handleSave} sx={{bgcolor:'#BA3CCD', color:'white'}}>Сохранить</Button>
         </DialogActions>
       </Dialog>
     </Box>

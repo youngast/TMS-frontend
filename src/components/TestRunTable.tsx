@@ -19,6 +19,8 @@ import { TestRunStatus } from "../enums/TestRunStatus";
 interface TestRunTableProps {
   projectId: number;
   onEdit: (testRun: any) => void;
+  testRuns: TestRun[];
+  onDelete: (testRunId: number) => void;
 }
 
 interface TestRun {

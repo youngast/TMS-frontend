@@ -1,10 +1,6 @@
 import { useState } from "react";
 import {
   Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
   Box,
   Typography,
   Button,
@@ -21,9 +17,13 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
 
+import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
+import { TreeItem } from '@mui/x-tree-view/TreeItem';
+
 interface TestSuite {
   id: number;
   name: string;
+  children?: TestSuite[]; // вложенность на будущее
 }
 
 interface Props {
@@ -45,9 +45,33 @@ export default function TestSuitesSidebar({
 }: Props) {
   const [editSuite, setEditSuite] = useState<{ id: number; name: string } | null>(null);
   const [newSuiteName, setNewSuiteName] = useState("");
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+
 
   const navigate = useNavigate();
 
+  const renderTree = (suite: TestSuite) => (
+    <TreeItem
+      key={suite.id}
+      itemId={suite.id.toString()}
+      label={
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="body2">{suite.name}</Typography>
+          <Box>
+            <IconButton size="small" onClick={(e) => { e.stopPropagation(); setEditSuite(suite); }}>
+              <EditIcon fontSize="small" />
+            </IconButton>
+            <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); onDeleteSuite(suite.id); }}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        </Box>
+      }
+      onClick={() => onSelectSuite(suite.id)}
+    >
+      {suite.children?.map((child) => renderTree(child))}
+    </TreeItem>
+  );
   return (
     <Drawer
       variant="permanent"
@@ -55,61 +79,60 @@ export default function TestSuitesSidebar({
         width: 250,
         flexShrink: 0,
         "& .MuiDrawer-paper": { width: 250, position: "relative" },
-        }}>
+      }}
+    >
       <Box sx={{ p: 2 }}>
         <IconButton onClick={() => navigate("/")} sx={{ mr: 1 }}>
           <ArrowBackIcon />
         </IconButton>
         <Typography variant="h5">Тест-сьюты</Typography>
 
-        {/* Поле ввода для названия нового тест-сьюта */}
-        <TextField
-          fullWidth
-          label="Название тест-сьюта"
-          value={newSuiteName}
-          onChange={(e) => setNewSuiteName(e.target.value)}
-          sx={{ mt: 2 }}
-        />
         <Button
           variant="contained"
           fullWidth
-          sx={{ mt: 2 }}
-          onClick={() => {
-            if (newSuiteName.trim()) {
-              onCreateSuite(newSuiteName);
-              setNewSuiteName("");
-            }
-          }}
-        >
-          + Добавить
+          sx={{ mt: 2, bgcolor: "#BA3CCD" }}
+          onClick={() => setCreateDialogOpen(true)}>
+          + Создать тест-сьют
         </Button>
+
+        <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)}>
+          <DialogTitle>Создание тест-сьюта</DialogTitle>
+          <DialogContent>
+            <TextField
+              fullWidth
+              label="Название тест-сьюта"
+              value={newSuiteName}
+              onChange={(e) => setNewSuiteName(e.target.value)}
+              placeholder="Начни вводить название..."
+              autoFocus
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setCreateDialogOpen(false)}>Отмена</Button>
+            <Button
+              onClick={() => {
+                if (newSuiteName.trim()) {
+                  onCreateSuite(newSuiteName.trim());
+                  setNewSuiteName("");
+                  setCreateDialogOpen(false);
+                }
+              }}
+              variant="contained"
+              sx={{ bgcolor: "#BA3CCD" }}
+            >
+              Создать
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         <Divider sx={{ my: 2 }} />
 
-        {/* Список тест-сьютов */}
-        <List>
-          {testSuites.map((suite) => (
-            <ListItem key={suite.id} disablePadding>
-              <ListItemButton
-                selected={selectedSuiteId === suite.id}
-                onClick={() => onSelectSuite(suite.id)}
-                sx={{ display: "flex", justifyContent: "space-between" }}>
-                <ListItemText primary={suite.name} />
-                <Box>
-                  <IconButton size="small" onClick={() => setEditSuite(suite)}>
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton size="small" color="error" onClick={() => onDeleteSuite(suite.id)}>
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
+        <SimpleTreeView
+          selected={selectedSuiteId ? [selectedSuiteId.toString()] : []}>
+          {testSuites.map((suite) => renderTree(suite))}
+        </SimpleTreeView>
       </Box>
 
-      {/* Модалка */}
       <Dialog open={!!editSuite} onClose={() => setEditSuite(null)}>
         <DialogTitle>Редактировать тест-сьют</DialogTitle>
         <DialogContent>
@@ -126,7 +149,10 @@ export default function TestSuitesSidebar({
               if (editSuite) {
                 onEditSuite(editSuite.id, editSuite.name);
                 setEditSuite(null);
-              }}}color="primary">
+              }
+            }}
+            color="primary"
+          >
             Сохранить
           </Button>
         </DialogActions>

@@ -5,7 +5,7 @@ function App() {
 
   return (
     <>
-      <MainPage />
+      <MainPage viewmode={"list"}/>
       <Outlet />
     </>
   )

@@ -5,7 +5,7 @@ import Filters from "../components/Filters";
 import ProjectList from "../components/ProjectList";
 import CreateProjectModal from "../components/CreateProjectModal";
 
-interface Projectlistprops{
+interface Projectlistprops {
     viewmode: "list" | "grid";
 }
 
@@ -17,7 +17,7 @@ export default function MainPage({viewmode}: Projectlistprops) {
         <>
             <ProjectLayer />
             {/* <Filters onViewChange={setViewMode} onOpenCreateProject={() => setOpen(true)} /> */}
-            <ProjectList viewMode = {viewmode}/>
+            <ProjectList/>
             <CreateProjectModal 
                 open={open} 
                 onClose={() => setOpen(false)} 

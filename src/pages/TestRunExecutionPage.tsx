@@ -4,6 +4,7 @@ import {
   getTestRunById,
   updateTestCaseStatus,
   completeTestRun,
+  exportToPdf
 } from "../api/TestRunApi";
 import {
   Container,
@@ -22,6 +23,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import IconButton from "@mui/material/IconButton";
 import { TestRunStatus } from "../enums/TestRunStatus";
+import DownloadIcon from '@mui/icons-material/Download';
 
 export default function TestRunExecutionPage() {
   const { projectId, testRunId } = useParams();
@@ -77,6 +79,18 @@ export default function TestRunExecutionPage() {
     }
   };
 
+  const handleExportToPdf = async () => {
+    const pid = Number(projectId);
+    const tid = Number(testRunId);
+    if (!testRun || isNaN(pid) || isNaN(tid)) return;
+  
+    try {
+      await exportToPdf(pid, tid);
+    } catch (err) {
+      console.error("Ошибка при экспорте в PDF:", err);
+    }
+  };
+  
   if (!testRun) return <Typography>Загрузка...</Typography>;
 
   return (
@@ -131,8 +145,7 @@ export default function TestRunExecutionPage() {
                 <Typography
                   variant="body2"
                   color="text.secondary"
-                  sx={{ flexBasis: "40%", textAlign: "right" }}
-                >
+                  sx={{ flexBasis: "40%", textAlign: "right" }}>
                   <b>Ожидается:</b> {step.expectedResult}
                 </Typography>
               </Box>
@@ -145,10 +158,12 @@ export default function TestRunExecutionPage() {
               variant="contained"
               color="primary"
               onClick={handleSave}
-              disabled={saving}>
+              disabled={saving}
+              sx={{bgcolor:'#BA3CCD'}}>
               {saving ? "Сохраняем..." : "Завершить тест-ран"}
             </Button>
       )}
+      <Button variant="contained" onClick={handleExportToPdf} sx={{bgcolor:'#BA3CCD',  float: 'right'}} startIcon={<DownloadIcon />}></Button>
     </Container>
   );
-}
+};

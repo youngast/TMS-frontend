@@ -65,6 +65,7 @@ export default function RegisterPage() {
           fullWidth
           margin="normal"
           value={email}
+          type="email"
           onChange={(e) => setEmail(e.target.value)}
         />
         <TextField
@@ -85,7 +86,7 @@ export default function RegisterPage() {
         <Button 
           variant="contained" 
           fullWidth 
-          sx={{ mt: 2 }} 
+          sx={{ mt: 2, bgcolor:'#BA3CCD' }} 
           onClick={handleRegister}
           disabled={loading}
         >
@@ -93,7 +94,7 @@ export default function RegisterPage() {
         </Button>
 
         <Typography variant="body2" sx={{ mt: 2 }}>
-          Уже есть аккаунт? <Button variant="text" onClick={() => navigate("/login")}>Войти</Button>
+          Уже есть аккаунт? <Button variant="text" sx={{ color: "#BA3CCD" }} onClick={() => navigate("/login")}>Войти</Button>
         </Typography>
       </Box>
     </Container>

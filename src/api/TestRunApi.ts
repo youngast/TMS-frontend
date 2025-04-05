@@ -53,3 +53,20 @@ export const updateTestCaseStatus = async (
 export const completeTestRun = async (projectId: number, testRunId: number) => {
     return axios.patch(`${API_URL}/${projectId}/test-runs/${testRunId}/complete`);
 };
+
+export const exportToPdf = async (projectId: number, testRunId: number) => {
+  const response = await axios.get(
+    `${API_URL}/${projectId}/test-runs/${testRunId}/export-to-pdf`,
+    {
+      responseType: 'blob',
+    }
+  );
+
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', `testrun-${testRunId}.pdf`);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+};
