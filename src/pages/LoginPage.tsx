@@ -51,9 +51,10 @@ export default function LoginPage() {
   };
 
   return (
-    <Container maxWidth="xs">
-      <Box sx={{ mt: 10, textAlign: "center" }}>
-        <Typography variant="h5" gutterBottom>
+    <>
+    <Container>
+      <Box maxWidth="sm" sx={{backgroundColor: "#FFFFFF", borderRadius: "8px", boxShadow: 2, padding: "20px", marginTop: "50px", marginLeft: "auto", marginRight: "auto"}}>
+        <Typography variant="h5" gutterBottom sx={{textAlign: "center", font: "Inter, sans-serif", fontWeight: 600}}>
           Вход в систему
         </Typography>
 
@@ -92,5 +93,6 @@ export default function LoginPage() {
         </Typography>
       </Box>
     </Container>
+    </>
   );
 }

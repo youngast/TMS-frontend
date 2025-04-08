@@ -159,7 +159,7 @@ const handleEditTestCase = async (id: number, testCaseData: Partial<TestCase>) =
         onEditSuite={handleEditSuite}
         onDeleteSuite={handleDeleteSuite}
       />
-      <TestCasesList testCases={testCases} onCreateTestCase={handleCreateTestCase} onEditTestCase={handleEditTestCase} onDeleteTestCase={handleDeleteTestCase}/>
+      <TestCasesList testCases={testCases} onCreateTestCase={handleCreateTestCase} onEditTestCase={handleEditTestCase} onDeleteTestCase={handleDeleteTestCase} />
       <Link to={`/projects/${projectId}/test-runs`}>
         <button style={{ padding: "10px 15px", background: "#1976d2", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", backgroundColor: "#BA3CCD", }}>
           Перейти в Test Run

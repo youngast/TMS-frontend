@@ -4,6 +4,7 @@ import ProjectLayer from "../components/ProjectLayer";
 import Filters from "../components/Filters";
 import ProjectList from "../components/ProjectList";
 import CreateProjectModal from "../components/CreateProjectModal";
+import ThemeToggleButton from "../components/ThemeToggleButton";
 
 interface Projectlistprops {
     viewmode: "list" | "grid";
@@ -21,8 +22,8 @@ export default function MainPage({viewmode}: Projectlistprops) {
             <CreateProjectModal 
                 open={open} 
                 onClose={() => setOpen(false)} 
-                onProjectCreated={() => {}} 
-            />
+                onProjectCreated={() => {}} />
+            <ThemeToggleButton/>
         </>
     );
 }

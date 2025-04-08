@@ -51,7 +51,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <Container maxWidth="xs">
+    <Container maxWidth="xs" sx={{backgroundColor: "#FFFFFF", borderRadius: "8px", boxShadow: 2, padding: "20px", marginTop: "50px"}}>
       <Box sx={{ mt: 10, textAlign: "center" }}>
         <Typography variant="h5" gutterBottom>
           Регистрация

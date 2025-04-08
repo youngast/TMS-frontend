@@ -45,12 +45,12 @@ export default function TestRunsPage() {
         }
     };
 
-    // const handleUpdate = async (e:React.MouseEvent,testRunId: number, data:any) => {
-    //     e.stopPropagation();
-    //     try{
-    //         await updateTestRun(projectId, testRunId,data);
-    //     }
-    // }
+    const handleEdit = async (e: React.MouseEvent, testRun: any) => {
+        e.stopPropagation();
+        setSelectedRun(testRun);
+        setOpenModal(true);
+    };
+    
 
     return (
         <Container>
@@ -80,7 +80,7 @@ export default function TestRunsPage() {
             {loading ? (
                 <CircularProgress sx={{ display: "block", mx: "auto", mt: 4 }} />
             ) : (
-                <TestRunTable projectId={projectId} testRuns={testRuns} onDelete={handleDelete} onEdit={setSelectedRun} />
+                <TestRunTable projectId={projectId} testRuns={testRuns} onDelete={handleDelete} onEdit={handleEdit} />
             )}
 
             {/* Модалка создания/редактирования тест-рана */}

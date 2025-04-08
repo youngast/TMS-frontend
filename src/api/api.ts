@@ -292,3 +292,14 @@ export const fetchUsers = async (email: string) => {
   });
   return response.data;
 };
+
+export const UpdateUser = async (userId: number, data: any) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("Токен отсутствует");
+  }
+  const response = await axios.patch(`http://localhost:3000/users/${userId}`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};

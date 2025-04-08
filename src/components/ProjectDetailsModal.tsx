@@ -35,7 +35,7 @@ export default function ProjectDetailsModal({ open, projectId, onClose }: Projec
   useEffect(() => {
     if (projectId) {
       fetchProjectById(projectId).then(setProject).catch(console.error);
-      fetchUsers().then(setUsers).catch(console.error);
+      fetchUsers("").then(setUsers).catch(console.error);
     }
   }, [projectId]);
 

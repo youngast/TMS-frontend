@@ -49,7 +49,7 @@ export default function TestSuitesSidebar({
 
 
   const navigate = useNavigate();
-
+  
   const renderTree = (suite: TestSuite) => (
     <TreeItem
       key={suite.id}

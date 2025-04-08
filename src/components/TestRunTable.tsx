@@ -71,6 +71,11 @@ const TestRunTable: React.FC<TestRunTableProps> = ({ projectId, onEdit, }) => {
     fetchTestRuns();
   };
 
+  const handleEdit = async (testRun: any) => {
+    await updateTestRun(projectId, testRun.id, testRun);
+    fetchTestRuns();
+  };
+
   return (
     <TableContainer component={Paper}>
       <Table>
@@ -90,7 +95,11 @@ const TestRunTable: React.FC<TestRunTableProps> = ({ projectId, onEdit, }) => {
               const label = statusLabels[testRun.status as TestRunStatus] || testRun.status;
 
               return (
-                <TableRow key={testRun.id} style={{ cursor: "pointer" }} sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }} onClick={()=> navigate(`/projects/${projectId}/test-runs/${testRun.id}/execute`)}>
+                <TableRow key={testRun.id} style={{ cursor: "pointer" }} sx={{ "&:hover": { backgroundColor: "#f5f5f5" } }} onClick={(e) => {
+                  const target = e.target as HTMLElement;
+                  if (target.closest("button")) return;
+                  navigate(`/projects/${projectId}/test-runs/${testRun.id}/execute`);
+                }}>
                   <TableCell>{testRun.title}</TableCell>
                   <TableCell style={{ color }}>
                     {label}
@@ -101,15 +110,12 @@ const TestRunTable: React.FC<TestRunTableProps> = ({ projectId, onEdit, }) => {
                   <TableCell>
                   {testRun.updatedAt ? 
                   new Intl.DateTimeFormat('ru-RU').format(new Date(testRun.updatedAt)) 
-                  : 'Не обновлялось'}                  </TableCell>
+                  : 'Не обновлялось'}
+                  </TableCell>
                   <TableCell>
-                    <IconButton color="primary" onClick={() => onEdit(testRun)}>
-                      <EditIcon />
+                  <IconButton color="primary" onClick={(e) => {e.stopPropagation(); onEdit(e, testRun);}}><EditIcon />
                     </IconButton>
-                    <IconButton
-                      color="secondary"
-                      onClick={() => handleDelete(testRun.id)}
-                    >
+                    <IconButton color="primary" onClick={(e) => { e.stopPropagation(); handleDelete(testRun.id);}}>
                       <DeleteIcon />
                     </IconButton>
                   </TableCell>

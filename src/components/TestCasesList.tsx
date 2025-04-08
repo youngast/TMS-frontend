@@ -21,6 +21,7 @@ import { searchTestCase } from "../api/TestCaseapi";
 import { useParams } from "react-router-dom";
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 
 interface Step {
   id: string;
@@ -61,7 +62,7 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
   }
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 7;
 
 
   const handleOpenModal = (testCase?: TestCase) => {
@@ -126,9 +127,12 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
 
   const handleDragEnd = (result: any) => {
     if (!result.destination || !selectedTestCase) return;
+  
     const reorderedSteps = Array.from(selectedTestCase.steps);
+  
     const [movedStep] = reorderedSteps.splice(result.source.index, 1);
     reorderedSteps.splice(result.destination.index, 0, movedStep);
+  
     setSelectedTestCase({ ...selectedTestCase, steps: reorderedSteps });
   };
 
@@ -230,13 +234,22 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          sx={{ display: "flex", alignItems: "center", mb: 2, gap: 1 }}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            mb: 2,
+                            gap: 1,
+                            cursor: "move",
+                          }}
                         >
+                          <IconButton {...provided.dragHandleProps}>
+                            <DragIndicatorIcon />
+                          </IconButton>
                           <TextField
                             fullWidth
                             label="Шаг"
                             value={step.step}
-                            onChange={(e) =>
+                            onChange={(e) => {
                               setSelectedTestCase((prev) =>
                                 prev
                                   ? {
@@ -246,14 +259,14 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
                                       ),
                                     }
                                   : prev
-                              )
-                            }
+                              );
+                            }}
                           />
                           <TextField
                             fullWidth
                             label="Ожидаемый результат"
                             value={step.expectedResult}
-                            onChange={(e) =>
+                            onChange={(e) => {
                               setSelectedTestCase((prev) =>
                                 prev
                                   ? {
@@ -263,8 +276,8 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
                                       ),
                                     }
                                   : prev
-                              )
-                            }
+                              );
+                            }}
                           />
                           <IconButton onClick={() => handleRemoveStep(step.id)} color="error">
                             <DeleteIcon />
