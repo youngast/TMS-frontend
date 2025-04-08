@@ -2,14 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, fetchUsersLogin } from "../api/api";
 import { TextField, Button, Box, Typography, Container, Alert } from "@mui/material";
+import { useAuth } from "../components/AuthContext";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [user, setUser] = useState<{ id: number; email: string } | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -20,7 +21,7 @@ export default function LoginPage() {
       }
     };
     checkAuth();
-  }, []);
+  }, [setUser, navigate]);
 
   const handleLogin = async () => {
     setError(null);
@@ -41,7 +42,7 @@ export default function LoginPage() {
       localStorage.setItem("token", token);
       const currentUser = await fetchUsersLogin();
       setUser(currentUser);
-      navigate("/");
+      navigate("/"); 
     } catch (err) {
       setError("Неверный email или пароль");
     } finally {

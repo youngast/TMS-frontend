@@ -10,7 +10,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CreateProjectModal from "./CreateProjectModal";
 import Filters from "./Filters";
 import { useAuth } from "./AuthContext";
-import {fetchMyProjects,deleteProject,addUserToProject,deleteUserFromProject} from "../api/Projectapi";
+import { fetchMyProjects, deleteProject, addUserToProject, deleteUserFromProject } from "../api/Projectapi";
 import UsersAutocomplete from "./UserAutocomplete";
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 
@@ -35,11 +35,11 @@ export default function ProjectList() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loadingUser } = useAuth();
 
   useEffect(() => {
     loadProjects();
-  }, [searchTerm, status]);
+}, [searchTerm, status, loadingUser]);
 
   const loadProjects = async () => {
     setLoading(true);
@@ -70,6 +70,7 @@ export default function ProjectList() {
     setSelectedProject(project);
     setMembersModalOpen(true);
   };
+
   const closeMembersModal = () => {
     setMembersModalOpen(false);
     setSelectedProject(null);
@@ -112,20 +113,19 @@ export default function ProjectList() {
       alert("Ошибка при добавлении пользователя");
     }
   };
-  
 
   const handleRemoveMember = async (userEmail: string) => {
     if (!selectedProject) return;
     try {
       await deleteUserFromProject(selectedProject.id, userEmail);
-        setSelectedProject((prev) => {
+      setSelectedProject((prev) => {
         if (!prev) return null;
         return {
           ...prev,
           members: (prev.members || []).filter((m) => m.email !== userEmail),
         };
       });
-  
+
       setProjects((prev) =>
         prev.map((proj) =>
           proj.id === selectedProject.id
@@ -140,9 +140,8 @@ export default function ProjectList() {
       alert("Ошибка при удалении пользователя");
     }
   };
-  
 
-  if (loading) return <Typography>Загрузка...</Typography>;
+  if (loading || !user) return <Typography>Загрузка...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (
@@ -164,7 +163,7 @@ export default function ProjectList() {
       />
 
       {/* Модалка "Управление участниками" */}
-      <Dialog open={membersModalOpen} onClose={closeMembersModal} sx={ { "& .MuiDialog-paper": { width: "80%" } }}>
+      <Dialog open={membersModalOpen} onClose={closeMembersModal} sx={{ "& .MuiDialog-paper": { width: "80%" } }}>
         <DialogTitle>Управление участниками</DialogTitle>
         <DialogContent>
           {selectedProject && (
@@ -180,8 +179,11 @@ export default function ProjectList() {
                     <ListItem
                       key={m.id}
                       secondaryAction={
-                        <Button color="error" onClick={() => handleRemoveMember(m.email)}>Удалить</Button>
-                        }>
+                        <Button color="error" onClick={() => handleRemoveMember(m.email)}>
+                          Удалить
+                        </Button>
+                      }
+                    >
                       <ListItemText primary={m.email} />
                     </ListItem>
                   ))}
@@ -200,81 +202,56 @@ export default function ProjectList() {
         </DialogActions>
       </Dialog>
 
-      {viewMode === "list" ? (
-        <TableContainer component={Paper} sx={{ mt: 2 }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell><b>Название проекта</b></TableCell>
-                <TableCell><b>Владелец</b></TableCell>
-                <TableCell align="right"><b>Действия</b></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {projects.length > 0 ? (
-                projects.map((project) => (
-                  <TableRow
-                    key={project.id}
-                    sx={{ cursor: "pointer", "&:hover": { bgcolor: "#f5f5f5" } }}
-                    onClick={() => handleOpenProject(project.id)}
-                  >
-                    <TableCell>{project.name}</TableCell>
-                    <TableCell>{project.owner.name}</TableCell>
-                    <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                      {user && user.id === project.owner.id && (
-                        <>
-                          <IconButton onClick={(e) => openMembersModal(e, project)}>
-                            <PersonAddAltIcon />
-                          </IconButton>
-                          <IconButton
-                            color="error"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteProject(project.id);
-                            }}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={3} align="center">
-                    Проектов нет
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      ) : (
-        <Grid container spacing={3} sx={{ mt: 2 }}>
-          {projects.length > 0 ? (
-            projects.map((project) => (
-              <Grid item xs={12} sm={6} md={3} key={project.id}>
-                <Card
-                  sx={{ p: 2, cursor: "pointer", "&:hover": { bgcolor: "#f5f5f5" } }}
+      {/* Список проектов */}
+      <TableContainer component={Paper} sx={{ mt: 2 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell><b>Название проекта</b></TableCell>
+              <TableCell><b>Владелец</b></TableCell>
+              <TableCell align="right"><b>Действия</b></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {projects.length > 0 ? (
+              projects.map((project) => (
+                <TableRow
+                  key={project.id}
+                  sx={{ cursor: "pointer", "&:hover": { bgcolor: "#f5f5f5" } }}
                   onClick={() => handleOpenProject(project.id)}
                 >
-                  <CardContent>
-                    <Typography variant="h6">{project.name}</Typography>
-                    <Typography variant="body2">
-                      Владелец: {project.owner.name}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))
-          ) : (
-            <Typography sx={{ textAlign: "center", width: "100%", mt: 2 }}>
-              Проектов нет
-            </Typography>
-          )}
-        </Grid>
-      )}
+                  <TableCell>{project.name}</TableCell>
+                  <TableCell>{project.owner.name}</TableCell>
+                  <TableCell align="right" onClick={(e) => e.stopPropagation()}>
+                    {user && user.id === project.owner.id && (  // Проверка владельца
+                      <>
+                        <IconButton onClick={(e) => openMembersModal(e, project)}>
+                          <PersonAddAltIcon />
+                        </IconButton>
+                        <IconButton
+                          color="error"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteProject(project.id);
+                          }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={3} align="center">
+                  Проектов нет
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </>
   );
 }

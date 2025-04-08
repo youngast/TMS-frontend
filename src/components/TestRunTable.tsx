@@ -12,15 +12,15 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import { getTestRuns, deleteTestRun } from "../api/TestRunApi";
+import { getTestRuns, deleteTestRun, updateTestRun } from "../api/TestRunApi";
 import { useNavigate } from "react-router-dom";
 import { TestRunStatus } from "../enums/TestRunStatus";
 
 interface TestRunTableProps {
   projectId: number;
-  onEdit: (testRun: any) => void;
+  onEdit: (e: React.MouseEvent, testRun: any) => void;
   testRuns: TestRun[];
-  onDelete: (testRunId: number) => void;
+  onDelete: (e: React.MouseEvent, testRunId: number) => void;
 }
 
 interface TestRun {
@@ -46,7 +46,7 @@ const statusLabels: { [key in TestRunStatus]?: string } = {
   [TestRunStatus.ONWORK]: "В процессе",
 };
 
-const TestRunTable: React.FC<TestRunTableProps> = ({ projectId, onEdit }) => {
+const TestRunTable: React.FC<TestRunTableProps> = ({ projectId, onEdit, }) => {
   const [testRuns, setTestRuns] = useState<TestRun[]>([]);
   const navigate = useNavigate();
 
@@ -99,8 +99,9 @@ const TestRunTable: React.FC<TestRunTableProps> = ({ projectId, onEdit }) => {
                     {new Date(testRun.createdAt).toLocaleString()}
                   </TableCell>
                   <TableCell>
-                    {new Date(testRun.updatedAt).toLocaleString()}
-                  </TableCell>
+                  {testRun.updatedAt ? 
+                  new Intl.DateTimeFormat('ru-RU').format(new Date(testRun.updatedAt)) 
+                  : 'Не обновлялось'}                  </TableCell>
                   <TableCell>
                     <IconButton color="primary" onClick={() => onEdit(testRun)}>
                       <EditIcon />

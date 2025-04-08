@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getTestRuns, deleteTestRun } from "../api/TestRunApi";
+import { getTestRuns, deleteTestRun, updateTestRun } from "../api/TestRunApi";
 import { Button, Container, Typography, Stack, CircularProgress, Snackbar, Alert, Box } from "@mui/material";
 import TestRunTable from "../components/TestRunTable";
 import TestRunModal from "../components/TestRunModal";
@@ -35,7 +35,8 @@ export default function TestRunsPage() {
         }
     };
 
-    const handleDelete = async (testRunId: number) => {
+    const handleDelete = async (e:React.MouseEvent,testRunId: number) => {
+        e.stopPropagation();
         try {
             await deleteTestRun(projectId, testRunId);
             fetchTestRuns();
@@ -43,6 +44,13 @@ export default function TestRunsPage() {
             setError("Ошибка удаления тест-рана");
         }
     };
+
+    // const handleUpdate = async (e:React.MouseEvent,testRunId: number, data:any) => {
+    //     e.stopPropagation();
+    //     try{
+    //         await updateTestRun(projectId, testRunId,data);
+    //     }
+    // }
 
     return (
         <Container>

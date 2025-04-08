@@ -104,6 +104,12 @@ export default function TestRunExecutionPage() {
         </Typography>
         </Box>
 
+        <Box sx={{ mb: 3, display: "flex", alignItems: "center"}}>
+        <Typography>
+          Описание: {testRun.description}
+        </Typography>
+        </Box>
+
       {testRun.testCases.map((testCase: any) => (
         <Accordion key={testCase.id} sx={{ mb: 2 }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}> 

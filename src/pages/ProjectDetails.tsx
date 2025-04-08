@@ -150,7 +150,7 @@ const handleEditTestCase = async (id: number, testCaseData: Partial<TestCase>) =
   );  
 
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: "flex", height: "100vh" }}>
       <TestSuitesSidebar
         testSuites={testSuites}
         selectedSuiteId={selectedSuiteId}

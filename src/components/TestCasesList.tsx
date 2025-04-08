@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -143,7 +143,7 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
   const totalPages = Math.ceil(filteredTestCases.length / itemsPerPage);
 
   return (
-    <Box sx={{ flex: 1, p: 3 }}>
+    <Box sx={{ flex: 1, p: 3, height: '100vh' }}>
       <Typography variant="h5">{"Проект"}</Typography>
       
       <Button variant="contained" sx={{ mt: 2, bgcolor: '#BA3CCD' }} onClick={() => handleOpenModal()}>
@@ -175,7 +175,7 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
         ))}
       </List>
 
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 1 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 1, marginTop: 'auto' }}>
       <Button
         variant="outlined"
         disabled={currentPage === 1}
