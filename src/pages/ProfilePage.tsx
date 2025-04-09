@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { fetchCurrentUser, UpdateUser } from '../api/api'; 
+import { fetchCurrentUser, UpdateUser } from '../api/api';
+import { uploadAvatar } from '../api/Userapi';
 import {
   Card,
   CardContent,
@@ -21,6 +22,7 @@ interface User {
   id: number;
   name: string;
   email: string;
+  avatarUrl?:string;
 }
 
 const ProfilePage = () => {
@@ -29,6 +31,7 @@ const ProfilePage = () => {
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState<User>({id: 0, name: '', email: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [avatarFile, setAvatarFile] = useState(false);
 
   const navigate = useNavigate();
 
@@ -70,6 +73,24 @@ const ProfilePage = () => {
     }
   };
 
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if(event.target.files){
+      setAvatarFile(true);
+      const file = event.target.files[0];
+      try{
+        const response = await uploadAvatar(userData!.id, file);
+        setUserData((prevState) => ({
+          ...prevState!,
+          avatarUrl: response.avatarUrl,
+        }));
+      }catch(error){
+        console.error("Error uploading avatar:", error);
+      }finally{ setAvatarFile(false);
+
+      }
+    }
+  }
+
   console.log("userData:", userData);
 
   if (loading) {
@@ -88,10 +109,6 @@ const ProfilePage = () => {
     );
   }
 
-  const handleAvatarUpload = () => {
-    alert('Загрузка аватара');
-  };
-
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
                 <IconButton onClick={() => navigate("/")} sx={{ mr: 1 }}>
@@ -101,9 +118,9 @@ const ProfilePage = () => {
         {/* Левая часть - Информация о пользователе */}
         <Grid item xs={12} md={4}>
           <Card sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 3 }}>
-            <Avatar sx={{ width: 100, height: 100, mb: 2 }} alt={userData.name} src="/path/to/avatar.jpg" />
-            <IconButton color="primary" onClick={handleAvatarUpload} sx={{ position: 'absolute', top: 10, right: 10 }}>
-              <PhotoCamera />
+            <IconButton component="label" sx={{ mb: 2 }} disabled={isSubmitting}>
+              <input accept="image/*" style={{ display: 'none'}} id="avatar-upload" type='file' onChange={handleAvatarUpload} />
+              <Avatar sx={{ width: 100, height: 100, mb: 2 }} alt={userData.name} src={userData.avatarUrl} />
             </IconButton>
             <Typography variant="h4" component="div" sx={{ mb: 2 }}>
               {userData.name}
