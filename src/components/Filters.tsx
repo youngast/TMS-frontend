@@ -101,7 +101,7 @@ export default function Filters({
           </Select>
         </FormControl>
 
-              {/* Переключение вида: grid / list */}
+      {/* Переключение вида: grid / list */}
       <Box sx={{ display: "flex", gap: 2, ml: "auto" }}>
         <IconButton
           onClick={() => onViewChange("grid")}

@@ -36,6 +36,10 @@ export default function NavBar() {
         navigate('/login');
     };
 
+    const handleProfilePage = () => {
+        navigate('/me');
+    }
+
     return(
         <>
         <Box sx={{display:'flex', width: '100%', bgcolor: 'background.white', justifyContent: 'space-between',
@@ -65,8 +69,8 @@ export default function NavBar() {
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
-            sx={{mt:1}}
-        >
+            sx={{mt:1}}>
+            <MenuItem onClick={handleProfilePage}>О себе</MenuItem>
             <MenuItem onClick={handleLogout}>Выход</MenuItem>
         </Menu>
 
