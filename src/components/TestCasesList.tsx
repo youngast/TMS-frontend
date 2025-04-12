@@ -44,9 +44,11 @@ interface Props {
   onCreateTestCase: (testCaseData: Omit<TestCase, "id" | "createdAt" | "updatedAt">) => void;
   onEditTestCase: (id: number, testCaseData: Partial<TestCase>) => void;
   onDeleteTestCase: (id: number) => void;
+  statusFilter: string;
+  setStatusFilter: (status: string) => void;
 }
 
-export default function TestCasesList({ testCases, onCreateTestCase, onEditTestCase, onDeleteTestCase }: Props,) {
+export default function TestCasesList({ testCases, onCreateTestCase, onEditTestCase, onDeleteTestCase, statusFilter, setStatusFilter }: Props,) {
   const [modalOpen, setModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedTestCase, setSelectedTestCase] = useState<TestCase | null>(null);
@@ -154,6 +156,18 @@ export default function TestCasesList({ testCases, onCreateTestCase, onEditTestC
         + Создать тест-кейс
       </Button>
       <TextField label="Поиск"value={searchTerm} sx={{ mx: 2}} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => {if (e.key === "Enter") {searchTestCase(Number(suiteId.id), searchTerm);}}}/>
+      {/* <Select
+        value={statusFilter}
+        onChange={(e) => setStatusFilter(e.target.value)}
+        sx={{ mx: 2, minWidth: 160 }}
+      >
+        <MenuItem value="all">Все</MenuItem>
+        {Object.entries(statusLabels).map(([value, label]) => (
+          <MenuItem key={value} value={value}>
+            {label}
+          </MenuItem>
+        ))}
+      </Select> */}
       <List sx={{ mt: 2 }}>
         {currentItems.map((testCase) => (
           <ListItem

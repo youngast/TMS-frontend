@@ -12,8 +12,9 @@ import Layout from "./components/Layout";
 import RegisterPage from "./pages/RegisterPage.tsx";
 import TestRunsPage from "./pages/TestRunPage.tsx";
 import TestRunExecutionPage from "./pages/TestRunExecutionPage.tsx";
-import { AuthProvider } from "./components/AuthContext.tsx";
+import { AuthProvider } from "./context/AuthContext.tsx";
 import { ThemeProviderWrapper } from "./utils/ThemeProviderWrapper.tsx";
+import { UserProvider } from "./context/UserContext.tsx"
 
 const router = createBrowserRouter([
   {
@@ -48,9 +49,11 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProviderWrapper>
-    <AuthProvider>
-    <RouterProvider router={router} />
-    </AuthProvider>
+      <AuthProvider>
+        <UserProvider>
+          <RouterProvider router={router} />
+        </UserProvider>
+      </AuthProvider>
     </ThemeProviderWrapper>
   </StrictMode>
 );

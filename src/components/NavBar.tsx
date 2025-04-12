@@ -2,7 +2,6 @@ import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import IconButton from '@mui/material/IconButton';
-import AvatarIcon from '../assets/avataricon.svg';
 import MessageIcon from '../assets/messageicon.svg';
 import NotificatonIcon from '../assets/notificationicon.svg';
 import * as React from 'react';
@@ -10,13 +9,14 @@ import '@fontsource/inter/600.css';
 import '@fontsource/inter/900.css';
 import { useNavigate } from 'react-router-dom';
 import { Menu, MenuItem } from '@mui/material';
-
+import { useUser } from '../context/UserContext';
 
 export default function NavBar() {
 
     const [value, setValue] = React.useState(0);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const navigate = useNavigate();
+    const { user } = useUser();
 
     const handleChange = (e: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
@@ -59,12 +59,10 @@ export default function NavBar() {
                 <img src={MessageIcon} alt='message'/>
                 </IconButton>
                 <IconButton onClick={handleMenuOpen}>
-                <img src={AvatarIcon} alt="avatar" />
+                <img src={user?.avatarUrl} alt="avatar" style={{borderRadius: '50%', width: '40px', height: '40px'}}/>
                 </IconButton>
             </Box>
-
         </Box>
-
         <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
@@ -77,4 +75,3 @@ export default function NavBar() {
         </>
     )
 }
-

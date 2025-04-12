@@ -13,7 +13,7 @@ interface Projectlistprops {
 export default function MainPage({viewmode}: Projectlistprops) {
     const [viewMode, setViewMode] = useState<"list" | "grid">("list");
     const [open, setOpen] = useState(false);
-
+    
     return (
         <>
             <ProjectLayer />

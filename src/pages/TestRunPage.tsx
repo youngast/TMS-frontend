@@ -55,7 +55,7 @@ export default function TestRunsPage() {
     return (
         <Container>
             <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-            <IconButton onClick={() => navigate(-1)} sx={{ mr: 1 }}>
+            <IconButton onClick={() => navigate(`/projects/${projectId}`)} sx={{ mr: 1 }}>
             <ArrowBackIcon />
             </IconButton>
                 <Typography variant="h4">

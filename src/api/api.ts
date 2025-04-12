@@ -141,9 +141,10 @@ export const fetchTestCases = async (suiteId: number) => {
   }
 };
 
-export const fetchTestCasesBySuiteId = async (testSuiteId: number) => {
+export const fetchTestCasesBySuiteId = async (testSuiteId: number, status: string = 'all') => {
   try {
-    const response = await axios.get(`${API_URL}/test-suites/${testSuiteId}/test-cases`);
+    const queryParam = status && status !== 'all' ? `?status=${status}` : '';
+    const response = await axios.get(`${API_URL}/test-suites/${testSuiteId}/test-cases${queryParam}`);
     return response.data;
   } catch (error) {
     console.error(`Ошибка при загрузке тест-кейсов для testSuiteId=${testSuiteId}:`, error);

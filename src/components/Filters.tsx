@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -12,7 +12,6 @@ import {
 } from "@mui/material";
 import AppsIcon from "@mui/icons-material/Apps";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
-import { findProjectByName } from "../api/Projectapi";
 
 interface Project {
   id: number;
@@ -36,24 +35,22 @@ export default function Filters({
   onStatusChange,
   onViewChange,
   onOpenCreateProject,
+  onSearchChange
 }: FiltersProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [foundProjects, setFoundProjects] = useState<Project[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSearch = async () => {
-    try {
-      setError(null);
-      const results = await findProjectByName(searchTerm);
-      setFoundProjects(results);
-    } catch (err) {
-      console.error("Ошибка при поиске:", err);
-      setError("Не удалось выполнить поиск");
-    }
-  };
+  const [inputValue, setInputValue] = useState(searchTerm);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
+    onSearchChange(event.target.value);
+  }
+
 
   return (
+    <>
     <Box
       sx={{
         display: "flex",
@@ -78,14 +75,9 @@ export default function Filters({
           label="Поиск"
           variant="outlined"
           size="small"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          onKeyPress={(e) => {
-            if (e.key === "Enter") {
-              handleSearch();
-            }
-          }}
-        />
+          value={inputValue}
+          onChange={handleSearchChange}
+          />
 
         {/* Селект статуса */}
         <FormControl size="small" sx={{ minWidth: 120 }}>
@@ -126,24 +118,7 @@ export default function Filters({
       </Box>
 
       {error && <Typography color="error">{error}</Typography>}
-
-      {/* Показ результатов, если пользователь уже искал */}
-      {foundProjects && foundProjects.length > 0 && (
-        <Box>
-          <Typography variant="subtitle1">
-            Результаты поиска ({foundProjects.length}):
-          </Typography>
-          <ul>
-            {foundProjects.map((p) => (
-              <li key={p.id}>{p.name}</li>
-            ))}
-          </ul>
-        </Box>
-      )}
-
-      {foundProjects && foundProjects.length === 0 && (
-        <Typography>По вашему запросу ничего не найдено</Typography>
-      )}
     </Box>
+    </>
   );
 }

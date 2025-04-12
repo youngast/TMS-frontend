@@ -9,8 +9,8 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import CreateProjectModal from "./CreateProjectModal";
 import Filters from "./Filters";
-import { useAuth } from "./AuthContext";
-import { fetchMyProjects, deleteProject, addUserToProject, deleteUserFromProject } from "../api/Projectapi";
+import { useAuth } from "../context/AuthContext";
+import { fetchMyProjects, deleteProject, addUserToProject, deleteUserFromProject, findProjectByName } from "../api/Projectapi";
 import UsersAutocomplete from "./UserAutocomplete";
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 
@@ -39,19 +39,45 @@ export default function ProjectList() {
 
   useEffect(() => {
     loadProjects();
-}, [searchTerm, status, loadingUser]);
+}, [ status, loadingUser]);
 
   const loadProjects = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchMyProjects(); // ваш API
+      const data = await fetchMyProjects(); // API
       setProjects(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Ошибка при загрузке проектов:", err);
       setError("Не удалось загрузить проекты.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSearchChange = async (term: string) => {
+    setSearchTerm(term);
+
+    if (!term) {
+      loadProjects();
+      return;
+    }
+  
+    try {
+      const results = await findProjectByName(term);
+  
+      // 🔒 Фильтрация по доступу
+      const accessible = results.filter((project) => {
+        return (
+          project.owner.id === user?.id ||
+          project.members?.some((member) => member.id === user?.id)
+        );
+      });
+  
+      setProjects(accessible);
+    } catch (err) {
+      console.error("Ошибка при поиске проектов:", err);
+      setError("Ошибка при поиске");
     }
   };
 
@@ -150,7 +176,7 @@ export default function ProjectList() {
         searchTerm={searchTerm}
         status={status}
         viewMode={viewMode}
-        onSearchChange={setSearchTerm}
+        onSearchChange={handleSearchChange}
         onStatusChange={setStatus}
         onViewChange={setViewMode}
         onOpenCreateProject={() => setModalOpen(true)}
@@ -203,55 +229,96 @@ export default function ProjectList() {
       </Dialog>
 
       {/* Список проектов */}
-      <TableContainer component={Paper} sx={{ mt: 2 }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell><b>Название проекта</b></TableCell>
-              <TableCell><b>Владелец</b></TableCell>
-              <TableCell align="right"><b>Действия</b></TableCell>
+      {viewMode === "list" ? (
+  <TableContainer component={Paper} sx={{ mt: 2 }}>
+    <Table>
+      <TableHead>
+        <TableRow>
+          <TableCell><b>Название проекта</b></TableCell>
+          <TableCell><b>Владелец</b></TableCell>
+          <TableCell align="right"><b>Действия</b></TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {projects.length > 0 ? (
+          projects.map((project) => (
+            <TableRow
+              key={project.id}
+              sx={{ cursor: "pointer", "&:hover": { bgcolor: "#f5f5f5" } }}
+              onClick={() => handleOpenProject(project.id)}
+            >
+              <TableCell>{project.name}</TableCell>
+              <TableCell>{project.owner.name}</TableCell>
+              <TableCell align="right" onClick={(e) => e.stopPropagation()}>
+                {user && user.id === project.owner.id && (
+                  <>
+                    <IconButton onClick={(e) => openMembersModal(e, project)}>
+                      <PersonAddAltIcon />
+                    </IconButton>
+                    <IconButton
+                      color="error"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteProject(project.id);
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </>
+                )}
+              </TableCell>
             </TableRow>
-          </TableHead>
-          <TableBody>
-            {projects.length > 0 ? (
-              projects.map((project) => (
-                <TableRow
-                  key={project.id}
-                  sx={{ cursor: "pointer", "&:hover": { bgcolor: "#f5f5f5" } }}
-                  onClick={() => handleOpenProject(project.id)}
-                >
-                  <TableCell>{project.name}</TableCell>
-                  <TableCell>{project.owner.name}</TableCell>
-                  <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                    {user && user.id === project.owner.id && (  // Проверка владельца
-                      <>
-                        <IconButton onClick={(e) => openMembersModal(e, project)}>
-                          <PersonAddAltIcon />
-                        </IconButton>
-                        <IconButton
-                          color="error"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteProject(project.id);
-                          }}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={3} align="center">
-                  Проектов нет
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell colSpan={3} align="center">
+              Проектов нет
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  </TableContainer>
+) : (
+  <Grid container spacing={2} sx={{ mt: 2 }}>
+    {projects.length > 0 ? (
+      projects.map((project) => (
+        <Grid item xs={12} sm={6} md={4} key={project.id}>
+          <Card
+            sx={{ cursor: "pointer", "&:hover": { boxShadow: 6 } }}
+            onClick={() => handleOpenProject(project.id)}
+          >
+            <CardContent>
+              <Typography variant="h6">{project.name}</Typography>
+              <Typography variant="body2" color="textSecondary">
+                Владелец: {project.owner.name}
+              </Typography>
+              {user && user.id === project.owner.id && (
+                <div style={{ marginTop: "8px", display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+                  <IconButton onClick={(e) => openMembersModal(e, project)} size="small">
+                    <PersonAddAltIcon />
+                  </IconButton>
+                  <IconButton
+                    color="error"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteProject(project.id);
+                    }}
+                    size="small"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      ))
+    ) : (
+      <Typography sx={{ mx: 2 }}>Проектов нет</Typography>
+    )}
+  </Grid>
+)}
     </>
   );
 }

@@ -44,6 +44,7 @@ export default function ProjectDetails() {
   });
   const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [filter, setFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
 
   useEffect(() => {
@@ -54,16 +55,12 @@ export default function ProjectDetails() {
 
   useEffect(() => {
     if (selectedSuiteId) {
-        console.log(`⚡ Запрос тест-кейсов: GET /test-suites/${selectedSuiteId}/test-cases`);
-        fetchTestCasesBySuiteId(selectedSuiteId).then((data) => {
-            console.log("Полученные тест-кейсы:", data);
-            setTestCases(data);
-        });
+      fetchTestCasesBySuiteId(selectedSuiteId, statusFilter).then(setTestCases);
     } else {
-        setTestCases([]);
+      setTestCases([]);
     }
-    console.log("Обновление selectedTestCase:", selectedTestCase);
-}, [selectedSuiteId]);
+  }, [selectedSuiteId, statusFilter]);
+  
 
 
   const handleCreateSuite = async (name: string) => {
@@ -159,7 +156,14 @@ const handleEditTestCase = async (id: number, testCaseData: Partial<TestCase>) =
         onEditSuite={handleEditSuite}
         onDeleteSuite={handleDeleteSuite}
       />
-      <TestCasesList testCases={testCases} onCreateTestCase={handleCreateTestCase} onEditTestCase={handleEditTestCase} onDeleteTestCase={handleDeleteTestCase} />
+      <TestCasesList
+        testCases={testCases}
+        onCreateTestCase={handleCreateTestCase}
+        onEditTestCase={handleEditTestCase}
+        onDeleteTestCase={handleDeleteTestCase}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        />
       <Link to={`/projects/${projectId}/test-runs`}>
         <button style={{ padding: "10px 15px", background: "#1976d2", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", backgroundColor: "#BA3CCD", }}>
           Перейти в Test Run

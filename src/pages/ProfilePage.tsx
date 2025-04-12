@@ -17,8 +17,9 @@ import {
 import { PhotoCamera } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useUser } from '../context/UserContext';
 
-interface User {
+export interface User {
   id: number;
   name: string;
   email: string;
@@ -32,6 +33,7 @@ const ProfilePage = () => {
   const [formData, setFormData] = useState<User>({id: 0, name: '', email: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [avatarFile, setAvatarFile] = useState(false);
+  const {refreshUser} = useUser();
 
   const navigate = useNavigate();
 
@@ -42,6 +44,7 @@ const ProfilePage = () => {
         setUserData(data);
         setFormData(data);
       }
+      await refreshUser();
       setLoading(false);
     };
 
@@ -83,6 +86,7 @@ const ProfilePage = () => {
           ...prevState!,
           avatarUrl: response.avatarUrl,
         }));
+        await refreshUser();
       }catch(error){
         console.error("Error uploading avatar:", error);
       }finally{ setAvatarFile(false);

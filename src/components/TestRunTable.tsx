@@ -113,9 +113,9 @@ const TestRunTable: React.FC<TestRunTableProps> = ({ projectId, onEdit, }) => {
                   : 'Не обновлялось'}
                   </TableCell>
                   <TableCell>
-                  <IconButton color="primary" onClick={(e) => {e.stopPropagation(); onEdit(e, testRun);}}><EditIcon />
+                  <IconButton onClick={(e) => {e.stopPropagation(); onEdit(e, testRun);}}><EditIcon />
                     </IconButton>
-                    <IconButton color="primary" onClick={(e) => { e.stopPropagation(); handleDelete(testRun.id);}}>
+                    <IconButton color="error" onClick={(e) => { e.stopPropagation(); handleDelete(testRun.id);}}>
                       <DeleteIcon />
                     </IconButton>
                   </TableCell>
